@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import productRoutes from './routes/product.routes';
 import categoryRoutes from './routes/category.routes';
 import orderRoutes from './routes/order.routes';
+import authRoutes from './routes/auth.routes';
 
 const app: Application = express();
 
@@ -17,6 +18,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
