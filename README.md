@@ -131,6 +131,3 @@ Run in production mode:
 npm start
 ```
 
-## License
-
-MIT
