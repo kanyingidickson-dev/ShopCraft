@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { productsAPI, Product } from '../services/api';
+import { productsAPI } from '../services/api';
+import type { Product } from '../services/api';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 
 const Products: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -9,7 +9,6 @@ const Products: React.FC = () => {
     const [error, setError] = useState('');
     const [notification, setNotification] = useState('');
     const { addToCart } = useCart();
-    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         loadProducts();

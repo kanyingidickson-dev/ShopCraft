@@ -9,37 +9,44 @@ import Products from './pages/Products';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
 
+console.log('App.tsx evaluating...');
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
+  console.log('ProtectedRoute, isAuthenticated:', isAuthenticated);
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
 function AppContent() {
+  console.log('AppContent rendering...');
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <main className="container mx-auto px-4 py-8">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
       </div>
     </Router>
   );
 }
 
 function App() {
+  console.log('App rendering...');
   return (
     <AuthProvider>
       <CartProvider>

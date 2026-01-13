@@ -1,0 +1,7 @@
+
+> server@1.0.0 start
+> node dist/server.js
+
+[dotenv@17.2.3] injecting env (2) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+Server is running on port 5000

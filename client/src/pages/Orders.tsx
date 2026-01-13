@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ordersAPI, Order } from '../services/api';
+import { ordersAPI } from '../services/api';
+import type { Order } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Orders: React.FC = () => {
