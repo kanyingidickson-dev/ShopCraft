@@ -1,35 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { ordersAPI } from '../services/api';
-import type { Order } from '../services/api';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useMyOrdersQuery } from '../hooks/useOrders';
+import type { OrderStatus } from '../services/api';
 
 const Orders: React.FC = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const { user } = useAuth();
 
-    useEffect(() => {
-        if (user) {
-            loadOrders();
-        }
-    }, [user]);
+    const {
+        data: orders = [],
+        isLoading: loading,
+        isError: error,
+        refetch,
+    } = useMyOrdersQuery(Boolean(user));
 
-    const loadOrders = async () => {
-        if (!user) return;
-
-        try {
-            const response = await ordersAPI.getUserOrders(user.id);
-            setOrders(response.data.data);
-        } catch (err) {
-            setError('Failed to load orders');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getStatusColor = (status: string) => {
-        const colors: Record<string, string> = {
+    const getStatusColor = (status: OrderStatus) => {
+        const colors: Record<OrderStatus, string> = {
             PENDING: 'bg-yellow-100 text-yellow-800',
             PAID: 'bg-blue-100 text-blue-800',
             SHIPPED: 'bg-purple-100 text-purple-800',
@@ -54,9 +39,9 @@ const Orders: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-600 mb-4">{error}</p>
+                    <p className="text-red-600 mb-4">Failed to load orders</p>
                     <button
-                        onClick={loadOrders}
+                        onClick={() => void refetch()}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                         Try Again

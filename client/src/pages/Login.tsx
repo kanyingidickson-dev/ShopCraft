@@ -1,25 +1,53 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const LoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1),
+});
+
+type LoginForm = z.infer<typeof LoginSchema>;
 
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginForm>({
+        resolver: zodResolver(LoginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+        },
+    });
+
+    const onSubmit = async (values: LoginForm) => {
         setError('');
         setLoading(true);
 
         try {
-            await login(email, password);
+            await login(values.email, values.password);
             navigate('/products');
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Login failed');
+        } catch (err: unknown) {
+            const maybeMessage =
+                typeof err === 'object' &&
+                err !== null &&
+                'response' in err &&
+                typeof (err as { response?: unknown }).response === 'object' &&
+                (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    : undefined;
+
+            setError(maybeMessage || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -34,13 +62,13 @@ const Login: React.FC = () => {
                         <p className="mt-2 text-gray-600">Sign in to your account</p>
                     </div>
 
-                    {error && (
+                    {(error || errors.email?.message || errors.password?.message) && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                            {error}
+                            {error || errors.email?.message || errors.password?.message}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
@@ -49,8 +77,7 @@ const Login: React.FC = () => {
                                 id="email"
                                 type="email"
                                 required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                {...register('email')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="you@example.com"
                             />
@@ -64,8 +91,7 @@ const Login: React.FC = () => {
                                 id="password"
                                 type="password"
                                 required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                {...register('password')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="••••••••"
                             />

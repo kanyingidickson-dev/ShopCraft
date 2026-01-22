@@ -1,55 +1,63 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import prisma from '../config/database';
+import { ok } from '../lib/apiResponse';
+import * as productsService from '../modules/products/products.service';
 
 export const getProducts = async (req: Request, res: Response) => {
-    try {
-        const products = await prisma.product.findMany({
-            include: { category: true }
-        });
-        res.status(StatusCodes.OK).json({ data: products });
-    } catch (error) {
-        console.error('Get Products Error:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to fetch products' });
-    }
+    const query = req.query as unknown as {
+        page: number;
+        limit: number;
+        q?: string;
+        sort: 'createdAt' | 'price' | 'name';
+        order: 'asc' | 'desc';
+    };
+
+    const result = await productsService.listProducts({
+        page: query.page,
+        limit: query.limit,
+        q: query.q,
+        sort: query.sort,
+        order: query.order,
+    });
+
+    res.status(StatusCodes.OK).json(
+        ok(
+            {
+                items: result.items,
+                page: result.page,
+                limit: result.limit,
+                total: result.total,
+                totalPages: result.totalPages,
+            },
+            'Products fetched',
+            req.headers['x-request-id'] as string | undefined
+        )
+    );
 };
 
 export const createProduct = async (req: Request, res: Response) => {
-    try {
-        const { name, description, price, stock, categoryId } = req.body;
-        // Add validation here in real app
+    const { name, description, price, stock, categoryId } = req.body as {
+        name: string;
+        description: string;
+        price: number;
+        stock: number;
+        categoryId?: string;
+    };
 
-        const product = await prisma.product.create({
-            data: {
-                name,
-                description,
-                price,
-                stock,
-                categoryId
-            }
-        });
-        res.status(StatusCodes.CREATED).json({ data: product });
-    } catch (error) {
-        console.error('Create Product Error:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to create product' });
-    }
+    const product = await productsService.createProduct({
+        name,
+        description,
+        price,
+        stock,
+        categoryId,
+    });
+
+    res.status(StatusCodes.CREATED).json(ok(product, 'Product created', req.headers['x-request-id'] as string | undefined));
 };
 
 export const getProductById = async (req: Request, res: Response) => {
-    try {
-        const id = req.params.id as string;
-        const product = await prisma.product.findUnique({
-            where: { id },
-            include: { category: true }
-        });
+    const id = req.params.id as string;
+    const product = await productsService.getProductById(id);
 
-        if (!product) {
-            res.status(StatusCodes.NOT_FOUND).json({ error: 'Product not found' });
-            return;
-        }
-
-        res.status(StatusCodes.OK).json({ data: product });
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to fetch product' });
-    }
+    res.status(StatusCodes.OK).json(ok(product, 'Product fetched', req.headers['x-request-id'] as string | undefined));
 };

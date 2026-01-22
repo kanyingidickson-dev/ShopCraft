@@ -2,14 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { ordersAPI } from '../services/api';
+import { useCreateOrderMutation } from '../hooks/useOrders';
 
 const Cart: React.FC = () => {
     const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
+
+    const createOrderMutation = useCreateOrderMutation();
 
     const handleCheckout = async () => {
         if (!isAuthenticated || !user) {
@@ -17,7 +18,6 @@ const Cart: React.FC = () => {
             return;
         }
 
-        setLoading(true);
         setError('');
 
         try {
@@ -26,13 +26,20 @@ const Cart: React.FC = () => {
                 quantity: item.quantity,
             }));
 
-            await ordersAPI.create(user.id, orderItems);
+            await createOrderMutation.mutateAsync(orderItems);
             clearCart();
             navigate('/orders');
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Checkout failed');
-        } finally {
-            setLoading(false);
+        } catch (err: unknown) {
+            const maybeMessage =
+                typeof err === 'object' &&
+                err !== null &&
+                'response' in err &&
+                typeof (err as { response?: unknown }).response === 'object' &&
+                (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    : undefined;
+
+            setError(maybeMessage || 'Checkout failed');
         }
     };
 
@@ -129,10 +136,10 @@ const Cart: React.FC = () => {
                             </div>
                             <button
                                 onClick={handleCheckout}
-                                disabled={loading}
+                                disabled={createOrderMutation.isPending}
                                 className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Processing...' : 'Proceed to Checkout'}
+                                {createOrderMutation.isPending ? 'Processing...' : 'Proceed to Checkout'}
                             </button>
                             <button
                                 onClick={clearCart}

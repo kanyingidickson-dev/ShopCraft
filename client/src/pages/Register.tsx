@@ -1,38 +1,63 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const RegisterSchema = z
+    .object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        password: z.string().min(8),
+        confirmPassword: z.string().min(8),
+    })
+    .refine((v) => v.password === v.confirmPassword, {
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+    });
+
+type RegisterForm = z.infer<typeof RegisterSchema>;
 
 const Register: React.FC = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const {
+        register: formRegister,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<RegisterForm>({
+        resolver: zodResolver(RegisterSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+        },
+    });
+
+    const onSubmit = async (values: RegisterForm) => {
         setError('');
-
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters');
-            return;
-        }
 
         setLoading(true);
 
         try {
-            await register(email, password, name);
+            await register(values.email, values.password, values.name);
             navigate('/products');
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Registration failed');
+        } catch (err: unknown) {
+            const maybeMessage =
+                typeof err === 'object' &&
+                err !== null &&
+                'response' in err &&
+                typeof (err as { response?: unknown }).response === 'object' &&
+                (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    : undefined;
+
+            setError(maybeMessage || 'Registration failed');
         } finally {
             setLoading(false);
         }
@@ -47,13 +72,17 @@ const Register: React.FC = () => {
                         <p className="mt-2 text-gray-600">Join ShopCraft today</p>
                     </div>
 
-                    {error && (
+                    {(error || errors.name?.message || errors.email?.message || errors.password?.message || errors.confirmPassword?.message) && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                            {error}
+                            {error ||
+                                errors.name?.message ||
+                                errors.email?.message ||
+                                errors.password?.message ||
+                                errors.confirmPassword?.message}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                                 Full Name
@@ -62,8 +91,7 @@ const Register: React.FC = () => {
                                 id="name"
                                 type="text"
                                 required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                {...formRegister('name')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="John Doe"
                             />
@@ -77,8 +105,7 @@ const Register: React.FC = () => {
                                 id="email"
                                 type="email"
                                 required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                {...formRegister('email')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="you@example.com"
                             />
@@ -92,8 +119,7 @@ const Register: React.FC = () => {
                                 id="password"
                                 type="password"
                                 required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                {...formRegister('password')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="••••••••"
                             />
@@ -107,8 +133,7 @@ const Register: React.FC = () => {
                                 id="confirmPassword"
                                 type="password"
                                 required
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                {...formRegister('confirmPassword')}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 placeholder="••••••••"
                             />

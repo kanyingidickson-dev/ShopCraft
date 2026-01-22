@@ -18,14 +18,18 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [items, setItems] = useState<CartItem[]>([]);
-
-    useEffect(() => {
+    const [items, setItems] = useState<CartItem[]>(() => {
         const storedCart = localStorage.getItem('cart');
-        if (storedCart) {
-            setItems(JSON.parse(storedCart));
+        if (!storedCart) {
+            return [];
         }
-    }, []);
+
+        try {
+            return JSON.parse(storedCart) as CartItem[];
+        } catch {
+            return [];
+        }
+    });
 
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(items));
@@ -65,7 +69,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setItems([]);
     };
 
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (

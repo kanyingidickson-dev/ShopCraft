@@ -1,0 +1,13 @@
+{
+  "name": "shopcraft",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "lint": "npm --prefix client run lint && npm --prefix server run lint",
+    "format:check": "npm --prefix client run format:check && npm --prefix server run format:check",
+    "typecheck": "npm --prefix server run test"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

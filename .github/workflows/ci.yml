@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+
+      - name: Install server deps
+        run: npm ci
+        working-directory: server
+
+      - name: Format check server
+        run: npm run format:check
+        working-directory: server
+
+      - name: Typecheck server
+        run: npm run test
+        working-directory: server
+
+      - name: Lint server
+        run: npm run lint
+        working-directory: server
+
+      - name: Build server
+        run: npm run build
+        working-directory: server
+
+      - name: Install client deps
+        run: npm ci
+        working-directory: client
+
+      - name: Lint client
+        run: npm run lint
+        working-directory: client
+
+      - name: Format check client
+        run: npm run format:check
+        working-directory: client
+
+      - name: Build client
+        run: npm run build
+        working-directory: client

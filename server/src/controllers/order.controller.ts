@@ -1,91 +1,57 @@
-import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import prisma from '../config/database';
+import type { Request, Response } from 'express';
+import type { OrderStatus } from '@prisma/client';
+import type { AuthRequest } from '../middleware/auth.middleware';
+import { ok } from '../lib/apiResponse';
+import { BadRequestError } from '../lib/errors';
+import * as ordersService from '../modules/orders/orders.service';
 
-export const createOrder = async (req: Request, res: Response) => {
-    try {
-        const { userId, items } = req.body;
-
-        let total = 0;
-        const orderItems = [];
-
-        for (const item of items) {
-            const product = await prisma.product.findUnique({
-                where: { id: item.productId }
-            });
-
-            if (!product) {
-                res.status(StatusCodes.BAD_REQUEST).json({ error: `Product ${item.productId} not found` });
-                return;
-            }
-
-            if (product.stock < item.quantity) {
-                res.status(StatusCodes.BAD_REQUEST).json({ error: `Insufficient stock for ${product.name}` });
-                return;
-            }
-
-            const itemTotal = Number(product.price) * item.quantity;
-            total += itemTotal;
-
-            orderItems.push({
-                productId: item.productId,
-                quantity: item.quantity,
-                price: product.price
-            });
-        }
-
-        const order = await prisma.order.create({
-            data: {
-                userId,
-                total,
-                items: {
-                    create: orderItems
-                }
-            },
-            include: {
-                items: {
-                    include: {
-                        product: true
-                    }
-                }
-            }
-        });
-
-        for (const item of items) {
-            await prisma.product.update({
-                where: { id: item.productId },
-                data: {
-                    stock: {
-                        decrement: item.quantity
-                    }
-                }
-            });
-        }
-
-        res.status(StatusCodes.CREATED).json({ data: order });
-    } catch (error) {
-        console.error('Create Order Error:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to create order' });
+export const createOrder = async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+    if (!userId) {
+        throw new BadRequestError('Missing authenticated user');
     }
+
+    const { items } = req.body as { items: ordersService.OrderItemInput[] };
+
+    const order = await ordersService.createOrder(userId, items);
+
+    res.status(StatusCodes.CREATED).json(ok(order, 'Order created', req.headers['x-request-id'] as string | undefined));
 };
 
-export const getUserOrders = async (req: Request, res: Response) => {
-    try {
-        const userId = req.params.userId as string;
-        const orders = await prisma.order.findMany({
-            where: { userId },
-            include: {
-                items: {
-                    include: {
-                        product: true
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
-        res.status(StatusCodes.OK).json({ data: orders });
-    } catch (error) {
-        console.error('Get User Orders Error:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to fetch orders' });
+export const getMyOrders = async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+    if (!userId) {
+        throw new BadRequestError('Missing authenticated user');
     }
+
+    const orders = await ordersService.getOrdersForUser(userId);
+
+    res.status(StatusCodes.OK).json(ok(orders, 'Orders fetched', req.headers['x-request-id'] as string | undefined));
+};
+
+export const getOrdersAdmin = async (req: Request, res: Response) => {
+    const query = req.query as unknown as {
+        page: number;
+        limit: number;
+        userId?: string;
+        status?: OrderStatus;
+    };
+
+    const result = await ordersService.listOrdersAdmin({
+        page: query.page,
+        limit: query.limit,
+        userId: query.userId,
+        status: query.status,
+    });
+
+    res.status(StatusCodes.OK).json(ok(result, 'Orders fetched', req.headers['x-request-id'] as string | undefined));
+};
+
+export const updateOrderStatusAdmin = async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const body = req.body as { status: OrderStatus };
+
+    const order = await ordersService.updateOrderStatusAdmin(id, body.status);
+    res.status(StatusCodes.OK).json(ok(order, 'Order updated', req.headers['x-request-id'] as string | undefined));
 };

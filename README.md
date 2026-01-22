@@ -7,7 +7,7 @@ A modern, scalable e-commerce platform built with Node.js, TypeScript, React, an
 ### Backend
 - Node.js with Express
 - TypeScript
-- Prisma ORM with SQLite (development)
+- Prisma ORM with PostgreSQL
 - RESTful API architecture
 
 ### Frontend
@@ -85,17 +85,21 @@ The frontend will be available at `http://localhost:5173`
 ## API Endpoints
 
 ### Products
-- `GET /api/products` - List all products
-- `POST /api/products` - Create a new product
-- `GET /api/products/:id` - Get product by ID
+- `GET /api/v1/products` - List products (supports pagination/search)
+- `POST /api/v1/products` - Create a new product (admin)
+- `GET /api/v1/products/:id` - Get product by ID
 
 ### Categories
-- `GET /api/categories` - List all categories
-- `POST /api/categories` - Create a new category
+- `GET /api/v1/categories` - List all categories
+- `POST /api/v1/categories` - Create a new category (admin)
 
 ### Orders
-- `POST /api/orders` - Create a new order
-- `GET /api/orders/user/:userId` - Get orders for a user
+- `POST /api/v1/orders` - Create a new order (authenticated)
+- `GET /api/v1/orders/me` - Get orders for the authenticated user
+- `GET /api/v1/orders` - List orders (admin, paginated)
+
+### OpenAPI
+- `GET /api/v1/openapi.json` - OpenAPI specification (stub)
 
 ### Health Check
 - `GET /health` - API health status

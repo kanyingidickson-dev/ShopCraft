@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import Home from './pages/Home';
@@ -8,17 +8,10 @@ import Register from './pages/Register';
 import Products from './pages/Products';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
-
-console.log('App.tsx evaluating...');
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-  console.log('ProtectedRoute, isAuthenticated:', isAuthenticated);
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-};
+import AdminOrders from './pages/AdminOrders';
+import { AdminRoute, ProtectedRoute } from './components/RouteGuards';
 
 function AppContent() {
-  console.log('AppContent rendering...');
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -38,6 +31,14 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/orders"
+              element={
+                <AdminRoute>
+                  <AdminOrders />
+                </AdminRoute>
+              }
+            />
           </Routes>
         </main>
       </div>
@@ -46,7 +47,6 @@ function AppContent() {
 }
 
 function App() {
-  console.log('App rendering...');
   return (
     <AuthProvider>
       <CartProvider>

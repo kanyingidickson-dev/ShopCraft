@@ -98,7 +98,14 @@ const Home: React.FC = () => {
     );
 };
 
-const FeatureCard = ({ icon, title, description, bgColor }: any) => (
+type FeatureCardProps = {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    bgColor: string;
+};
+
+const FeatureCard = ({ icon, title, description, bgColor }: FeatureCardProps) => (
     <div className="group bg-white rounded-[2.5rem] p-10 shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-50 flex flex-col items-start">
         <div className={`w-16 h-16 ${bgColor} rounded-2xl flex items-center justify-center mb-8 transform transition-transform group-hover:rotate-12 duration-300`}>
             {icon}

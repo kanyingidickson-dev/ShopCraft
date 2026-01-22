@@ -1,29 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { productsAPI } from '../services/api';
+import React, { useState } from 'react';
 import type { Product } from '../services/api';
 import { useCart } from '../context/CartContext';
+import { useProductsQuery } from '../hooks/useProducts';
 
 const Products: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const { data: products = [], isLoading: loading, isError: isErrorLoading } = useProductsQuery();
     const [notification, setNotification] = useState('');
     const { addToCart } = useCart();
-
-    useEffect(() => {
-        loadProducts();
-    }, []);
-
-    const loadProducts = async () => {
-        try {
-            const response = await productsAPI.getAll();
-            setProducts(response.data.data);
-        } catch (err) {
-            setError('Failed to load products');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const getProductImage = (name: string) => {
         const images: Record<string, string> = {
@@ -57,7 +40,7 @@ const Products: React.FC = () => {
         );
     }
 
-    if (error) {
+    if (isErrorLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm">
@@ -67,9 +50,9 @@ const Products: React.FC = () => {
                         </svg>
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Something went wrong</h3>
-                    <p className="text-gray-600 mb-6">{error}</p>
+                    <p className="text-gray-600 mb-6">Failed to load products</p>
                     <button
-                        onClick={loadProducts}
+                        onClick={() => window.location.reload()}
                         className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors"
                     >
                         Try Again
@@ -118,7 +101,7 @@ const Products: React.FC = () => {
                         </div>
                         <h3 className="text-3xl font-bold text-gray-900 mb-4">No products available</h3>
                         <p className="text-gray-500 text-lg mb-8">We're currently updating our catalog with new premium arrivals.</p>
-                        <button className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={loadProducts}>
+                        <button className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={() => window.location.reload()}>
                             Refresh
                         </button>
                     </div>

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
 const Header: React.FC = () => {
-    const { user, logout, isAuthenticated } = useAuth();
+    const { user, logout, isAuthenticated, isAdmin } = useAuth();
     const { itemCount } = useCart();
     const location = useLocation();
 
@@ -36,6 +36,15 @@ const Header: React.FC = () => {
 
                         {isAuthenticated ? (
                             <>
+                                {isAdmin && (
+                                    <Link
+                                        to="/admin/orders"
+                                        className={`text-sm font-bold tracking-wide transition-colors ${isActive('/admin/orders') ? 'text-blue-600' : 'text-gray-500 hover:text-[#0F172A]'
+                                            }`}
+                                    >
+                                        ADMIN
+                                    </Link>
+                                )}
                                 <Link
                                     to="/orders"
                                     className={`text-sm font-bold tracking-wide transition-colors ${isActive('/orders') ? 'text-blue-600' : 'text-gray-500 hover:text-[#0F172A]'
