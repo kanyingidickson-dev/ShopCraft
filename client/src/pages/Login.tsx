@@ -18,6 +18,8 @@ const Login: React.FC = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const isDemoMode = !import.meta.env.VITE_API_URL;
+
     const {
         register,
         handleSubmit,
@@ -25,8 +27,8 @@ const Login: React.FC = () => {
     } = useForm<LoginForm>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            email: '',
-            password: '',
+            email: isDemoMode ? 'demo@shopcraft.demo' : '',
+            password: isDemoMode ? 'password123' : '',
         },
     });
 

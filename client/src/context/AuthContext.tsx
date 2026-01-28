@@ -28,6 +28,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setToken(storedToken);
             }
 
+            const isDemoMode = !import.meta.env.VITE_API_URL;
+
             try {
                 const meResponse = await authAPI.me();
                 const nextUser = meResponse.data.data?.user ?? null;
@@ -59,6 +61,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     localStorage.removeItem('user');
                 }
             } catch {
+                if (isDemoMode) {
+                    try {
+                        const demoEmail = 'demo@shopcraft.demo';
+                        const demoPassword = 'password123';
+                        const response = await authAPI.login(demoEmail, demoPassword);
+                        const { user: demoUser, accessToken } = response.data.data;
+                        setUser(demoUser);
+                        setToken(accessToken);
+                        localStorage.setItem('token', accessToken);
+                        localStorage.setItem('user', JSON.stringify(demoUser));
+                        return;
+                    } catch {
+                        // fall through
+                    }
+                }
+
                 setUser(null);
                 setToken(null);
                 localStorage.removeItem('token');
