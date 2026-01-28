@@ -8,7 +8,34 @@ const Products: React.FC = () => {
     const [notification, setNotification] = useState('');
     const { addToCart } = useCart();
 
-    const getProductImage = (name: string) => {
+    const makePlaceholderDataUrl = (name: string, category?: string) => {
+        const title = category ? `${category} · ${name}` : name;
+        const initials = name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((w) => w[0]!.toUpperCase())
+            .join('');
+
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#E2E8F0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#g)"/>
+  <rect x="40" y="40" width="720" height="920" rx="48" fill="#FFFFFF" opacity="0.65"/>
+  <text x="80" y="140" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="28" font-weight="700" fill="#334155">${title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text>
+  <text x="400" y="560" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="140" font-weight="800" fill="#0F172A" opacity="0.9">${initials || 'SC'}</text>
+  <text x="400" y="640" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="24" font-weight="600" fill="#475569" opacity="0.9">ShopCraft</text>
+</svg>`;
+
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    };
+
+    const getProductImageSrc = (product: Product) => {
         const baseUrl = import.meta.env.BASE_URL;
         const images: Record<string, string> = {
             'Wireless Headphones': `${baseUrl}images/headphones.png`,
@@ -18,7 +45,8 @@ const Products: React.FC = () => {
             'Coffee Maker': `${baseUrl}images/coffee_maker.png`,
             'LED Desk Lamp': `${baseUrl}images/lamp.png`,
         };
-        return images[name] || '';
+
+        return images[product.name] ?? makePlaceholderDataUrl(product.name, product.category?.name);
     };
 
     const handleAddToCart = (product: Product) => {
@@ -154,19 +182,12 @@ const Products: React.FC = () => {
                                 className="group bg-white rounded-[2rem] shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-blue-50 overflow-hidden flex flex-col"
                             >
                                 <div className="relative aspect-[4/5] bg-[#F1F5F9] overflow-hidden">
-                                    {getProductImage(product.name) ? (
-                                        <img
-                                            src={getProductImage(product.name)}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                                            <span className="text-6xl transform group-hover:scale-125 transition-transform duration-500">
-                                                🛍️
-                                            </span>
-                                        </div>
-                                    )}
+                                    <img
+                                        src={getProductImageSrc(product)}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                        loading="lazy"
+                                    />
                                     <div className="absolute top-4 left-4">
                                         {product.category && (
                                             <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50/90 backdrop-blur-md rounded-full border border-blue-100 shadow-sm">

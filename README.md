@@ -2,6 +2,9 @@
 
 A modern, scalable e-commerce platform built with Node.js, TypeScript, React, and Prisma.
 
+🛒 ShopCraft – E-commerce Web App  
+🔗 [Live Demo](https://kanyingidickson-dev.github.io/ShopCraft/)
+
 ## Demo Mode (Frontend-only)
 
 This project supports a frontend-only demo mode powered by Mock Service Worker (MSW).

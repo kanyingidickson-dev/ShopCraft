@@ -1,4 +1,6 @@
 declare module '@tailwindcss/vite' {
-    const plugin: (...args: any[]) => any;
+    import type { Plugin } from 'vite';
+
+    const plugin: () => Plugin;
     export default plugin;
 }
