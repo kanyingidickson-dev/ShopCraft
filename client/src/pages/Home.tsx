@@ -6,43 +6,43 @@ const Home: React.FC = () => {
         <div className="min-h-screen bg-[#F8FAFC]">
             {/* Hero Section */}
             <div className="relative overflow-hidden pt-20 pb-40">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-br from-blue-50/50 via-purple-50/50 to-pink-50/50 blur-3xl -z-10 rounded-full opacity-60 animate-pulse"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-br from-slate-50/60 via-gray-50/60 to-amber-50/60 blur-3xl -z-10 rounded-full opacity-70"></div>
 
                 <div className="max-w-7xl mx-auto px-6 lg:px-8">
                     <div className="text-center">
-                        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full mb-8 border border-blue-100 animate-bounce">
+                        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white text-gray-700 rounded-full mb-8 border border-gray-200 shadow-sm">
                             <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-40"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                             </span>
                             <span className="text-xs font-black uppercase tracking-widest">
                                 New Session Available
                             </span>
                         </div>
 
-                        <h1 className="text-7xl md:text-8xl font-black text-[#0F172A] tracking-tighter mb-8 leading-[0.9]">
+                        <h1 className="text-6xl md:text-7xl font-extrabold text-[#0F172A] tracking-tight mb-8 leading-[0.95]">
                             Curating the <br />
-                            <span className="text-blue-600">Future</span> of Retail.
+                            <span className="text-[#0F172A]">future</span> of retail.
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-gray-500 font-medium mb-12 max-w-3xl mx-auto leading-relaxed">
-                            ShopCraft is not just a platform; it's a statement. Experience a
-                            meticulously curated collection of premium products delivered with
-                            uncompromising speed.
+                        <p className="text-lg md:text-xl text-gray-600 font-medium mb-12 max-w-3xl mx-auto leading-relaxed">
+                            ShopCraft is a clean, fast storefront demo built to feel real. Browse a
+                            large catalog, filter instantly, and add items to your cart with zero
+                            friction.
                         </p>
 
                         <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
                             <Link
                                 to="/products"
-                                className="w-full sm:w-auto px-10 py-5 bg-[#0F172A] hover:bg-[#1E293B] text-white font-black rounded-2xl shadow-2xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-1 active:scale-95 text-lg tracking-tight"
+                                className="w-full sm:w-auto px-10 py-4 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-[0.99] text-lg"
                             >
-                                EXPLORE COLLECTIONS
+                                Explore collections
                             </Link>
                             <Link
                                 to="/register"
-                                className="w-full sm:w-auto px-10 py-5 bg-white hover:bg-gray-50 text-[#0F172A] font-black rounded-2xl shadow-xl border border-gray-100 hover:border-gray-200 transition-all transform hover:-translate-y-1 active:scale-95 text-lg tracking-tight"
+                                className="w-full sm:w-auto px-10 py-4 bg-white hover:bg-gray-50 text-[#0F172A] font-bold rounded-2xl shadow-sm border border-gray-200 hover:border-gray-300 transition-all transform hover:-translate-y-0.5 active:scale-[0.99] text-lg"
                             >
-                                START YOUR JOURNEY
+                                Create an account
                             </Link>
                         </div>
                     </div>
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
                     <FeatureCard
                         icon={
                             <svg
-                                className="w-8 h-8 text-blue-600"
+                                className="w-8 h-8 text-amber-700"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -70,13 +70,13 @@ const Home: React.FC = () => {
                         }
                         title="AUTHENTIC QUALITY"
                         description="Every item in our collection undergoes a rigorous multi-point inspection to ensure absolute perfection before it reaches your hands."
-                        bgColor="bg-blue-100"
+                        bgColor="bg-amber-100"
                     />
 
                     <FeatureCard
                         icon={
                             <svg
-                                className="w-8 h-8 text-purple-600"
+                                className="w-8 h-8 text-slate-700"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -91,13 +91,13 @@ const Home: React.FC = () => {
                         }
                         title="PRIME DELIVERY"
                         description="With our global logistics network, we offer same-day processing and expedited global shipping, trackable in real-time."
-                        bgColor="bg-purple-100"
+                        bgColor="bg-slate-100"
                     />
 
                     <FeatureCard
                         icon={
                             <svg
-                                className="w-8 h-8 text-pink-600"
+                                className="w-8 h-8 text-emerald-700"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ const Home: React.FC = () => {
                         }
                         title="ELITE SECURITY"
                         description="Your data and transactions are protected by industry-leading end-to-end encryption and advanced fraud prevention systems."
-                        bgColor="bg-pink-100"
+                        bgColor="bg-emerald-100"
                     />
                 </div>
             </div>

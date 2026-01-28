@@ -35,28 +35,100 @@ const Products: React.FC = () => {
     const [minPriceInput, setMinPriceInput] = useState(minPriceRaw ?? '');
     const [maxPriceInput, setMaxPriceInput] = useState(maxPriceRaw ?? '');
 
-    const makePlaceholderDataUrl = (name: string, category?: string) => {
-        const title = category ? `${category} · ${name}` : name;
-        const initials = name
-            .split(' ')
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((w) => w[0]!.toUpperCase())
-            .join('');
+    const escapeXml = (value: string) =>
+        value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+
+    const hashString = (value: string) => {
+        let h = 2166136261;
+        for (let i = 0; i < value.length; i++) {
+            h ^= value.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+    };
+
+    const makeProductThumbDataUrl = (product: Product) => {
+        const id = product.id ?? product.name;
+        const categoryName = product.category?.name ?? 'Shop';
+
+        const palettes: Record<string, { bg1: string; bg2: string; accent: string }> = {
+            Electronics: { bg1: '#EEF2FF', bg2: '#E0E7FF', accent: '#1D4ED8' },
+            Fashion: { bg1: '#FFF7ED', bg2: '#FFEDD5', accent: '#B45309' },
+            'Home & Kitchen': { bg1: '#ECFDF5', bg2: '#D1FAE5', accent: '#047857' },
+            Beauty: { bg1: '#FDF2F8', bg2: '#FCE7F3', accent: '#BE185D' },
+            Books: { bg1: '#F1F5F9', bg2: '#E2E8F0', accent: '#0F172A' },
+            'Sports & Outdoors': { bg1: '#ECFEFF', bg2: '#CFFAFE', accent: '#0E7490' },
+            'Toys & Games': { bg1: '#FEFCE8', bg2: '#FEF9C3', accent: '#854D0E' },
+            Health: { bg1: '#EFF6FF', bg2: '#DBEAFE', accent: '#1E40AF' },
+        };
+
+        const palette = palettes[categoryName] ?? { bg1: '#F8FAFC', bg2: '#E2E8F0', accent: '#0F172A' };
+        const seed = hashString(`${id}:${categoryName}:${product.name}`);
+        const a = 20 + (seed % 50);
+        const b = 30 + ((seed >>> 8) % 50);
+        const c = 40 + ((seed >>> 16) % 50);
+
+        const safeName = escapeXml(product.name);
+        const safeCategory = escapeXml(categoryName);
+        const shortName = safeName.length > 28 ? `${safeName.slice(0, 27)}…` : safeName;
+
+        const iconPaths: Record<string, string> = {
+            Electronics:
+                'M240 640h320c22 0 40-18 40-40V360c0-22-18-40-40-40H240c-22 0-40 18-40 40v240c0 22 18 40 40 40zm60-60V380h200v200H300z',
+            Fashion:
+                'M270 360l60-60h140l60 60-60 60v240H330V420l-60-60z',
+            'Home & Kitchen':
+                'M320 380c0-44 36-80 80-80h40c44 0 80 36 80 80v40H320v-40zm-40 80h320v180c0 44-36 80-80 80H400c-44 0-80-36-80-80V460z',
+            Beauty:
+                'M380 300h40v90h60v70h-160v-70h60v-90zm-40 230h200v110c0 44-36 80-80 80h-40c-44 0-80-36-80-80V530z',
+            Books:
+                'M300 320h220c33 0 60 27 60 60v260c-12-10-28-16-46-16H300c-33 0-60-27-60-60V380c0-33 27-60 60-60zm20 70v160h190V390H320z',
+            'Sports & Outdoors':
+                'M270 520h80v-60h100v60h80v80h-80v60H350v-60h-80v-80z',
+            'Toys & Games':
+                'M300 420h90v-90h110v90h90v110h-90v90H390v-90h-90V420zm110 20v70h70v-70h-70z',
+            Health:
+                'M360 330h80v90h90v80h-90v90h-80v-90h-90v-80h90v-90z',
+        };
+
+        const icon = iconPaths[categoryName] ?? iconPaths.Books;
 
         const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F8FAFC"/>
-      <stop offset="1" stop-color="#E2E8F0"/>
+      <stop offset="0" stop-color="${palette.bg1}"/>
+      <stop offset="1" stop-color="${palette.bg2}"/>
     </linearGradient>
+    <radialGradient id="r" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
   </defs>
+
   <rect width="800" height="1000" fill="url(#g)"/>
-  <rect x="40" y="40" width="720" height="920" rx="48" fill="#FFFFFF" opacity="0.65"/>
-  <text x="80" y="140" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="28" font-weight="700" fill="#334155">${title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text>
-  <text x="400" y="560" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="140" font-weight="800" fill="#0F172A" opacity="0.9">${initials || 'SC'}</text>
-  <text x="400" y="640" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="24" font-weight="600" fill="#475569" opacity="0.9">ShopCraft</text>
+  <circle cx="${180 + a}" cy="${160 + b}" r="${140 + (a % 40)}" fill="url(#r)"/>
+  <circle cx="${640 - b}" cy="${260 + c}" r="${160 + (b % 60)}" fill="url(#r)"/>
+
+  <rect x="56" y="56" width="688" height="888" rx="56" fill="#FFFFFF" opacity="0.72"/>
+
+  <text x="96" y="132" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="22" font-weight="800" fill="#475569">${safeCategory.toUpperCase()}</text>
+  <text x="96" y="184" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="34" font-weight="900" fill="#0F172A">${shortName}</text>
+
+  <g transform="translate(0,0)">
+    <rect x="96" y="240" width="608" height="560" rx="40" fill="#FFFFFF" opacity="0.9"/>
+    <path d="${icon}" fill="${palette.accent}" opacity="0.92"/>
+    <path d="M160 820h480" stroke="#CBD5E1" stroke-width="6" stroke-linecap="round"/>
+    <path d="M160 864h340" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <rect x="96" y="900" width="210" height="52" rx="26" fill="${palette.accent}" opacity="0.12"/>
+  <text x="116" y="934" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="18" font-weight="800" fill="${palette.accent}">ShopCraft</text>
 </svg>`;
 
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -73,7 +145,7 @@ const Products: React.FC = () => {
             'LED Desk Lamp': `${baseUrl}images/lamp.png`,
         };
 
-        return images[product.name] ?? makePlaceholderDataUrl(product.name, product.category?.name);
+        return images[product.name] ?? makeProductThumbDataUrl(product);
     };
 
     const handleAddToCart = (product: Product) => {
@@ -339,18 +411,19 @@ const Products: React.FC = () => {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {products.map((product) => (
                             <div
                                 key={product.id}
-                                className="group bg-white rounded-[2rem] shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-blue-50 overflow-hidden flex flex-col"
+                                className="group bg-white rounded-[1.5rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col min-w-0"
                             >
                                 <div className="relative aspect-[4/5] bg-[#F1F5F9] overflow-hidden">
                                     <img
                                         src={getProductImageSrc(product)}
                                         alt={product.name}
-                                        className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                        className="block w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-[1.03]"
                                         loading="lazy"
+                                        decoding="async"
                                     />
                                     <div className="absolute top-4 left-4">
                                         {product.category && (
@@ -361,11 +434,11 @@ const Products: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="p-8 flex-1 flex flex-col">
-                                    <h3 className="text-xl font-bold text-[#1E293B] mb-2 group-hover:text-blue-600 transition-colors">
+                                <div className="p-6 flex-1 flex flex-col min-w-0">
+                                    <h3 className="text-lg font-extrabold text-[#0F172A] mb-2 group-hover:text-gray-900 transition-colors line-clamp-2">
                                         {product.name}
                                     </h3>
-                                    <p className="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed font-medium">
+                                    <p className="text-sm text-gray-600 mb-5 line-clamp-2 leading-relaxed font-medium">
                                         {product.description}
                                     </p>
 
@@ -396,12 +469,12 @@ const Products: React.FC = () => {
                                         <button
                                             onClick={() => handleAddToCart(product)}
                                             disabled={product.stock === 0}
-                                            className="w-full py-4 px-6 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-2xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md hover:shadow-xl active:scale-95 flex items-center justify-center space-x-2 group/btn"
+                                            className="w-full py-3.5 px-5 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.99] flex items-center justify-center space-x-2 group/btn"
                                         >
                                             <span>
                                                 {product.stock === 0
                                                     ? 'Out of Stock'
-                                                    : 'Add to Collection'}
+                                                    : 'Add to cart'}
                                             </span>
                                             <svg
                                                 className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1"
