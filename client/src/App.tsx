@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
@@ -13,7 +13,7 @@ import { AdminRoute, ProtectedRoute } from './components/RouteGuards';
 
 function AppContent() {
     return (
-        <Router basename={import.meta.env.BASE_URL}>
+        <Router>
             <div className="min-h-screen bg-gray-50 text-gray-900">
                 <Header />
                 <main className="container mx-auto px-4 py-8">
