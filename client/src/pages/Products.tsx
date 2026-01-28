@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useProductsQuery } from '../hooks/useProducts';
 
 const Products: React.FC = () => {
-    const { data: products = [], isLoading: loading, isError: isErrorLoading } = useProductsQuery();
+    const [searchParams] = useSearchParams();
+    const q = (searchParams.get('q') ?? '').trim();
+
+    const { data: products = [], isLoading: loading, isError: isErrorLoading } = useProductsQuery({
+        page: 1,
+        limit: 48,
+        q: q || undefined,
+        sort: 'createdAt',
+        order: 'desc',
+    });
     const [notification, setNotification] = useState('');
     const { addToCart } = useCart();
 
