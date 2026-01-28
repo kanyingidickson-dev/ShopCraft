@@ -155,6 +155,9 @@ export const productsAPI = {
         page?: number;
         limit?: number;
         q?: string;
+        categoryId?: string;
+        minPrice?: number;
+        maxPrice?: number;
         sort?: 'createdAt' | 'price' | 'name';
         order?: 'asc' | 'desc';
     }) => api.get<ApiResponse<PaginatedResult<Product>>>('/products', { params }),

@@ -159,6 +159,11 @@ export const handlers = [
 
         const url = new URL(request.url);
         const q = (url.searchParams.get('q') ?? '').trim().toLowerCase();
+        const categoryId = (url.searchParams.get('categoryId') ?? '').trim();
+        const minPriceRaw = url.searchParams.get('minPrice');
+        const maxPriceRaw = url.searchParams.get('maxPrice');
+        const minPrice = minPriceRaw ? Number(minPriceRaw) : null;
+        const maxPrice = maxPriceRaw ? Number(maxPriceRaw) : null;
         const sort = (url.searchParams.get('sort') ?? 'createdAt') as
             | 'createdAt'
             | 'price'
@@ -175,6 +180,18 @@ export const handlers = [
                     .filter(Boolean)
                     .some((v) => String(v).toLowerCase().includes(q)),
             );
+        }
+
+        if (categoryId) {
+            items = items.filter((p) => p.category?.id === categoryId);
+        }
+
+        if (minPrice !== null && !Number.isNaN(minPrice)) {
+            items = items.filter((p) => Number(p.price) >= minPrice);
+        }
+
+        if (maxPrice !== null && !Number.isNaN(maxPrice)) {
+            items = items.filter((p) => Number(p.price) <= maxPrice);
         }
 
         if (sort === 'name') {

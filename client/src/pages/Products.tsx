@@ -3,20 +3,37 @@ import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useProductsQuery } from '../hooks/useProducts';
+import { useCategoriesQuery } from '../hooks/useCategories';
 
 const Products: React.FC = () => {
     const [searchParams] = useSearchParams();
     const q = (searchParams.get('q') ?? '').trim();
+    const categoryId = (searchParams.get('categoryId') ?? '').trim();
+
+    const sort = (searchParams.get('sort') ?? 'createdAt') as 'createdAt' | 'price' | 'name';
+    const order = (searchParams.get('order') ?? 'desc') as 'asc' | 'desc';
+
+    const minPriceRaw = searchParams.get('minPrice');
+    const maxPriceRaw = searchParams.get('maxPrice');
+    const minPrice = minPriceRaw ? Number(minPriceRaw) : undefined;
+    const maxPrice = maxPriceRaw ? Number(maxPriceRaw) : undefined;
 
     const { data: products = [], isLoading: loading, isError: isErrorLoading } = useProductsQuery({
         page: 1,
         limit: 48,
         q: q || undefined,
-        sort: 'createdAt',
-        order: 'desc',
+        categoryId: categoryId || undefined,
+        minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
+        maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
+        sort,
+        order,
     });
+    const { data: categories = [] } = useCategoriesQuery();
     const [notification, setNotification] = useState('');
     const { addToCart } = useCart();
+
+    const [minPriceInput, setMinPriceInput] = useState(minPriceRaw ?? '');
+    const [maxPriceInput, setMaxPriceInput] = useState(maxPriceRaw ?? '');
 
     const makePlaceholderDataUrl = (name: string, category?: string) => {
         const title = category ? `${category} · ${name}` : name;
@@ -114,7 +131,7 @@ const Products: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] py-16">
+        <div className="min-h-screen bg-[#F8FAFC] py-10">
             {notification && (
                 <div className="fixed top-24 right-8 bg-gray-900/90 backdrop-blur-md text-white px-8 py-4 rounded-2xl shadow-2xl z-50 animate-slide-in flex items-center space-x-3 border border-gray-800">
                     <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -136,35 +153,172 @@ const Products: React.FC = () => {
                 </div>
             )}
 
-            <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 space-y-4 md:space-y-0 text-left">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-6 gap-4 text-left">
                     <div>
-                        <h1 className="text-5xl font-extrabold text-[#0F172A] tracking-tight mb-3">
-                            Premium Collection
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
+                            Shop
                         </h1>
-                        <p className="text-lg text-gray-500 font-medium max-w-lg">
-                            Expertly curated products designed to elevate your lifestyle and empower
-                            your productivity.
+                        <p className="text-sm sm:text-base text-gray-600 font-medium max-w-2xl">
+                            Browse categories, filter by price, and sort results like a real marketplace.
                         </p>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm font-semibold text-gray-400">
-                        <span>Home</span>
-                        <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                            />
-                        </svg>
-                        <span className="text-blue-600">Products</span>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="text-sm text-gray-600">
+                            <span className="font-semibold text-gray-900">{products.length}</span> items
+                            {q ? (
+                                <>
+                                    <span className="text-gray-400"> · </span>
+                                    <span className="font-semibold text-gray-900">Search:</span> “{q}”
+                                </>
+                            ) : null}
+                        </div>
+
+                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            Sort
+                            <select
+                                value={`${sort}:${order}`}
+                                onChange={(e) => {
+                                    const [nextSort, nextOrder] = e.target.value.split(':') as [
+                                        'createdAt' | 'price' | 'name',
+                                        'asc' | 'desc',
+                                    ];
+                                    const next = new URLSearchParams(searchParams);
+                                    next.set('sort', nextSort);
+                                    next.set('order', nextOrder);
+                                    window.location.hash = `#/products?${next.toString()}`;
+                                }}
+                                className="h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm font-semibold text-gray-800"
+                            >
+                                <option value="createdAt:desc">Featured</option>
+                                <option value="price:asc">Price: Low to High</option>
+                                <option value="price:desc">Price: High to Low</option>
+                                <option value="name:asc">Name: A to Z</option>
+                            </select>
+                        </label>
                     </div>
                 </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <aside className="lg:col-span-3">
+                        <div className="bg-white rounded-2xl border border-gray-200 p-5 sticky top-20">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-sm font-extrabold text-gray-900 tracking-wide">
+                                    Filters
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = new URLSearchParams(searchParams);
+                                        next.delete('categoryId');
+                                        next.delete('minPrice');
+                                        next.delete('maxPrice');
+                                        next.delete('sort');
+                                        next.delete('order');
+                                        window.location.hash = `#/products?${next.toString()}`;
+                                        setMinPriceInput('');
+                                        setMaxPriceInput('');
+                                    }}
+                                    className="text-xs font-semibold text-gray-600 hover:text-gray-900"
+                                >
+                                    Reset
+                                </button>
+                            </div>
+
+                            <div className="mb-6">
+                                <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest mb-3">
+                                    Category
+                                </h3>
+                                <div className="space-y-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const next = new URLSearchParams(searchParams);
+                                            next.delete('categoryId');
+                                            window.location.hash = `#/products?${next.toString()}`;
+                                        }}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                                            !categoryId
+                                                ? 'bg-gray-900 text-white border-gray-900'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        All Categories
+                                    </button>
+
+                                    {categories.map((c) => (
+                                        <button
+                                            key={c.id}
+                                            type="button"
+                                            onClick={() => {
+                                                const next = new URLSearchParams(searchParams);
+                                                next.set('categoryId', c.id);
+                                                window.location.hash = `#/products?${next.toString()}`;
+                                            }}
+                                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                                                categoryId === c.id
+                                                    ? 'bg-gray-900 text-white border-gray-900'
+                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            {c.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="mb-2">
+                                <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest mb-3">
+                                    Price
+                                </h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                                            Min
+                                        </label>
+                                        <input
+                                            value={minPriceInput}
+                                            onChange={(e) => setMinPriceInput(e.target.value)}
+                                            inputMode="decimal"
+                                            placeholder="0"
+                                            className="w-full h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                                            Max
+                                        </label>
+                                        <input
+                                            value={maxPriceInput}
+                                            onChange={(e) => setMaxPriceInput(e.target.value)}
+                                            inputMode="decimal"
+                                            placeholder="999"
+                                            className="w-full h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = new URLSearchParams(searchParams);
+                                        const min = minPriceInput.trim();
+                                        const max = maxPriceInput.trim();
+                                        if (min) next.set('minPrice', min);
+                                        else next.delete('minPrice');
+                                        if (max) next.set('maxPrice', max);
+                                        else next.delete('maxPrice');
+                                        window.location.hash = `#/products?${next.toString()}`;
+                                    }}
+                                    className="mt-3 w-full h-10 bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold rounded-lg transition-colors"
+                                >
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <section className="lg:col-span-9">
 
                 {products.length === 0 ? (
                     <div className="bg-white rounded-[2.5rem] p-24 text-center shadow-lg border border-gray-100">
@@ -269,6 +423,8 @@ const Products: React.FC = () => {
                         ))}
                     </div>
                 )}
+                    </section>
+                </div>
             </div>
         </div>
     );

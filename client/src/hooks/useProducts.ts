@@ -6,6 +6,9 @@ export type UseProductsQueryParams = {
     page?: number;
     limit?: number;
     q?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
     sort?: 'createdAt' | 'price' | 'name';
     order?: 'asc' | 'desc';
 };
