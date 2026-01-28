@@ -9,13 +9,14 @@ const Products: React.FC = () => {
     const { addToCart } = useCart();
 
     const getProductImage = (name: string) => {
+        const baseUrl = import.meta.env.BASE_URL;
         const images: Record<string, string> = {
-            'Wireless Headphones': '/images/headphones.png',
-            'Smart Watch': '/images/watch.png',
-            'Running Shoes': '/images/shoes.png',
-            'Laptop Stand': '/images/laptop_stand.png',
-            'Coffee Maker': '/images/coffee_maker.png',
-            'LED Desk Lamp': '/images/lamp.png',
+            'Wireless Headphones': `${baseUrl}images/headphones.png`,
+            'Smart Watch': `${baseUrl}images/watch.png`,
+            'Running Shoes': `${baseUrl}images/shoes.png`,
+            'Laptop Stand': `${baseUrl}images/laptop_stand.png`,
+            'Coffee Maker': `${baseUrl}images/coffee_maker.png`,
+            'LED Desk Lamp': `${baseUrl}images/lamp.png`,
         };
         return images[name] || '';
     };
