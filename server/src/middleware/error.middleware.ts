@@ -14,7 +14,9 @@ export const errorMiddleware = (err: unknown, req: Request, res: Response, next:
     }
 
     if (err instanceof ZodError) {
-        res.status(StatusCodes.BAD_REQUEST).json(fail('Validation failed', err.flatten(), requestId));
+        res.status(StatusCodes.BAD_REQUEST).json(
+            fail('Validation failed', err.flatten(), requestId),
+        );
         return;
     }
 
@@ -25,13 +27,19 @@ export const errorMiddleware = (err: unknown, req: Request, res: Response, next:
 
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-            res.status(StatusCodes.CONFLICT).json(fail('Resource already exists', undefined, requestId));
+            res.status(StatusCodes.CONFLICT).json(
+                fail('Resource already exists', undefined, requestId),
+            );
             return;
         }
 
-        res.status(StatusCodes.BAD_REQUEST).json(fail('Database error', { code: err.code }, requestId));
+        res.status(StatusCodes.BAD_REQUEST).json(
+            fail('Database error', { code: err.code }, requestId),
+        );
         return;
     }
 
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(fail('Internal server error', undefined, requestId));
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
+        fail('Internal server error', undefined, requestId),
+    );
 };

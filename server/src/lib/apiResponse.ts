@@ -13,7 +13,11 @@ export const ok = <T>(data: T, message = 'OK', requestId?: string): ApiResponse<
     data,
 });
 
-export const fail = (message: string, errors?: unknown, requestId?: string): ApiResponse<undefined> => ({
+export const fail = (
+    message: string,
+    errors?: unknown,
+    requestId?: string,
+): ApiResponse<undefined> => ({
     success: false,
     message,
     requestId,

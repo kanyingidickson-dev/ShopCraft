@@ -7,7 +7,7 @@ export const CreateOrderSchema = z.object({
             z.object({
                 productId: z.string().uuid(),
                 quantity: z.number().int().positive(),
-            })
+            }),
         )
         .min(1),
 });

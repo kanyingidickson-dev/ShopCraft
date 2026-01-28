@@ -8,6 +8,12 @@ import { CreateCategorySchema } from '../schemas/category.schemas';
 const router = Router();
 
 router.get('/', asyncHandler(getCategories));
-router.post('/', authenticate, authorize('ADMIN'), validateBody(CreateCategorySchema), asyncHandler(createCategory));
+router.post(
+    '/',
+    authenticate,
+    authorize('ADMIN'),
+    validateBody(CreateCategorySchema),
+    asyncHandler(createCategory),
+);
 
 export default router;

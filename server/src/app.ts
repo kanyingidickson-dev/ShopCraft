@@ -28,7 +28,7 @@ app.use(
     cors({
         origin: env.CORS_ORIGINS.split(',').map((s) => s.trim()),
         credentials: true,
-    })
+    }),
 );
 app.use(
     rateLimit({
@@ -36,12 +36,13 @@ app.use(
         limit: 300,
         standardHeaders: true,
         legacyHeaders: false,
-    })
+    }),
 );
 
 app.use((req, res, next) => {
     const existing = req.headers['x-request-id'];
-    const requestId = typeof existing === 'string' && existing.trim().length > 0 ? existing : crypto.randomUUID();
+    const requestId =
+        typeof existing === 'string' && existing.trim().length > 0 ? existing : crypto.randomUUID();
 
     (req.headers as Record<string, unknown>)['x-request-id'] = requestId;
     res.setHeader('X-Request-Id', requestId);
@@ -54,7 +55,7 @@ app.use(
         customProps: (req) => ({
             requestId: req.headers['x-request-id'],
         }),
-    })
+    }),
 );
 
 // Routes

@@ -8,7 +8,13 @@ import { CreateProductSchema, ProductListQuerySchema } from '../schemas/product.
 const router = Router();
 
 router.get('/', validateQuery(ProductListQuerySchema), asyncHandler(getProducts));
-router.post('/', authenticate, authorize('ADMIN'), validateBody(CreateProductSchema), asyncHandler(createProduct));
+router.post(
+    '/',
+    authenticate,
+    authorize('ADMIN'),
+    validateBody(CreateProductSchema),
+    asyncHandler(createProduct),
+);
 router.get('/:id', asyncHandler(getProductById));
 
 export default router;

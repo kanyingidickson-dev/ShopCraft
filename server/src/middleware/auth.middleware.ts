@@ -20,7 +20,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
         req.userId = decoded.userId;
         req.userRole = decoded.role;
         next();
-    } catch (error) {
+    } catch {
         next(new UnauthorizedError('Invalid or expired token'));
     }
 };

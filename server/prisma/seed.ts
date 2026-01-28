@@ -13,11 +13,12 @@ async function main() {
 
     console.log('Created categories');
 
-    const products = await Promise.all([
+    await Promise.all([
         prisma.product.create({
             data: {
                 name: 'Wireless Headphones',
-                description: 'Premium noise-cancelling wireless headphones with 30-hour battery life',
+                description:
+                    'Premium noise-cancelling wireless headphones with 30-hour battery life',
                 price: 199.99,
                 stock: 50,
                 categoryId: categories[0].id,
@@ -110,7 +111,7 @@ async function main() {
 
     const hashedPassword = await bcrypt.hash('password123', 10);
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email: 'demo@shopcraft.com',
             password: hashedPassword,
@@ -121,7 +122,7 @@ async function main() {
 
     console.log('Created demo user');
 
-    const admin = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email: 'admin@shopcraft.com',
             password: hashedPassword,

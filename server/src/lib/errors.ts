@@ -4,7 +4,11 @@ export class AppError extends Error {
     public readonly statusCode: number;
     public readonly details?: unknown;
 
-    constructor(message: string, statusCode = StatusCodes.INTERNAL_SERVER_ERROR, details?: unknown) {
+    constructor(
+        message: string,
+        statusCode = StatusCodes.INTERNAL_SERVER_ERROR,
+        details?: unknown,
+    ) {
         super(message);
         this.statusCode = statusCode;
         this.details = details;

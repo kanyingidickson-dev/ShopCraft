@@ -19,11 +19,7 @@ export const countOrders = (where: Prisma.OrderWhereInput) => {
     return prisma.order.count({ where });
 };
 
-export const findOrders = (args: {
-    where: Prisma.OrderWhereInput;
-    skip: number;
-    take: number;
-}) => {
+export const findOrders = (args: { where: Prisma.OrderWhereInput; skip: number; take: number }) => {
     const { where, skip, take } = args;
 
     return prisma.order.findMany({
@@ -79,7 +75,7 @@ export const findProductById = (tx: Prisma.TransactionClient, id: string) => {
 
 export const decrementProductStockIfAvailable = (
     tx: Prisma.TransactionClient,
-    args: { productId: string; quantity: number }
+    args: { productId: string; quantity: number },
 ) => {
     return tx.product.updateMany({
         where: {
@@ -98,7 +94,7 @@ export const createOrderWithItems = (
         userId: string;
         total: number;
         items: Array<{ productId: string; quantity: number; price: Prisma.Decimal }>;
-    }
+    },
 ) => {
     return tx.order.create({
         data: {

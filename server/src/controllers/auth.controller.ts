@@ -18,7 +18,11 @@ const revokeAllRefreshTokensForUser = async (userId: string) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-    const { email, password, name } = req.body as { email: string; password: string; name?: string };
+    const { email, password, name } = req.body as {
+        email: string;
+        password: string;
+        name?: string;
+    };
 
     const existingUser = await prisma.user.findUnique({
         where: { email },
@@ -68,8 +72,8 @@ export const register = async (req: Request, res: Response) => {
                 accessToken,
             },
             'User registered',
-            req.headers['x-request-id'] as string | undefined
-        )
+            req.headers['x-request-id'] as string | undefined,
+        ),
     );
 };
 
@@ -120,8 +124,8 @@ export const login = async (req: Request, res: Response) => {
                 accessToken,
             },
             'Logged in',
-            req.headers['x-request-id'] as string | undefined
-        )
+            req.headers['x-request-id'] as string | undefined,
+        ),
     );
 };
 
@@ -191,7 +195,9 @@ export const refresh = async (req: Request, res: Response) => {
         maxAge: env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
     });
 
-    res.status(StatusCodes.OK).json(ok({ accessToken }, 'Token refreshed', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok({ accessToken }, 'Token refreshed', req.headers['x-request-id'] as string | undefined),
+    );
 };
 
 export const logout = async (req: Request, res: Response) => {
@@ -208,7 +214,9 @@ export const logout = async (req: Request, res: Response) => {
     }
 
     res.clearCookie(refreshTokenCookieName, refreshTokenCookieOptions);
-    res.status(StatusCodes.OK).json(ok(null, 'Logged out', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok(null, 'Logged out', req.headers['x-request-id'] as string | undefined),
+    );
 };
 
 export const me = async (req: AuthRequest, res: Response) => {
@@ -226,5 +234,7 @@ export const me = async (req: AuthRequest, res: Response) => {
         throw new NotFoundError('User not found');
     }
 
-    res.status(StatusCodes.OK).json(ok({ user }, 'Me', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok({ user }, 'Me', req.headers['x-request-id'] as string | undefined),
+    );
 };

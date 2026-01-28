@@ -30,8 +30,8 @@ export const getProducts = async (req: Request, res: Response) => {
                 totalPages: result.totalPages,
             },
             'Products fetched',
-            req.headers['x-request-id'] as string | undefined
-        )
+            req.headers['x-request-id'] as string | undefined,
+        ),
     );
 };
 
@@ -52,12 +52,16 @@ export const createProduct = async (req: Request, res: Response) => {
         categoryId,
     });
 
-    res.status(StatusCodes.CREATED).json(ok(product, 'Product created', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.CREATED).json(
+        ok(product, 'Product created', req.headers['x-request-id'] as string | undefined),
+    );
 };
 
 export const getProductById = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const product = await productsService.getProductById(id);
 
-    res.status(StatusCodes.OK).json(ok(product, 'Product fetched', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok(product, 'Product fetched', req.headers['x-request-id'] as string | undefined),
+    );
 };

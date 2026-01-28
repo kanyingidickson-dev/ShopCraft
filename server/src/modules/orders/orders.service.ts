@@ -15,7 +15,8 @@ export const createOrder = async (userId: string, items: OrderItemInput[]) => {
 
     return prisma.$transaction(async (tx) => {
         let total = 0;
-        const orderItems: Array<{ productId: string; quantity: number; price: Prisma.Decimal }> = [];
+        const orderItems: Array<{ productId: string; quantity: number; price: Prisma.Decimal }> =
+            [];
 
         for (const item of items) {
             const product = await ordersRepository.findProductById(tx, item.productId);

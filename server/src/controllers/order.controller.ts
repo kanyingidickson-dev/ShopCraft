@@ -16,7 +16,9 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
     const order = await ordersService.createOrder(userId, items);
 
-    res.status(StatusCodes.CREATED).json(ok(order, 'Order created', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.CREATED).json(
+        ok(order, 'Order created', req.headers['x-request-id'] as string | undefined),
+    );
 };
 
 export const getMyOrders = async (req: AuthRequest, res: Response) => {
@@ -27,7 +29,9 @@ export const getMyOrders = async (req: AuthRequest, res: Response) => {
 
     const orders = await ordersService.getOrdersForUser(userId);
 
-    res.status(StatusCodes.OK).json(ok(orders, 'Orders fetched', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok(orders, 'Orders fetched', req.headers['x-request-id'] as string | undefined),
+    );
 };
 
 export const getOrdersAdmin = async (req: Request, res: Response) => {
@@ -45,7 +49,9 @@ export const getOrdersAdmin = async (req: Request, res: Response) => {
         status: query.status,
     });
 
-    res.status(StatusCodes.OK).json(ok(result, 'Orders fetched', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok(result, 'Orders fetched', req.headers['x-request-id'] as string | undefined),
+    );
 };
 
 export const updateOrderStatusAdmin = async (req: Request, res: Response) => {
@@ -53,5 +59,7 @@ export const updateOrderStatusAdmin = async (req: Request, res: Response) => {
     const body = req.body as { status: OrderStatus };
 
     const order = await ordersService.updateOrderStatusAdmin(id, body.status);
-    res.status(StatusCodes.OK).json(ok(order, 'Order updated', req.headers['x-request-id'] as string | undefined));
+    res.status(StatusCodes.OK).json(
+        ok(order, 'Order updated', req.headers['x-request-id'] as string | undefined),
+    );
 };
