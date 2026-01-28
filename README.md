@@ -2,6 +2,15 @@
 
 A modern, scalable e-commerce platform built with Node.js, TypeScript, React, and Prisma.
 
+## Demo Mode (Frontend-only)
+
+This project supports a frontend-only demo mode powered by Mock Service Worker (MSW).
+When no `VITE_API_URL` is provided, the frontend intercepts requests to `/api/v1/*` in the browser
+and serves seeded mock data.
+
+This allows the UI to run and be deployed as a static site (e.g. GitHub Pages) with zero backend,
+database, or environment variables.
+
 ## Tech Stack
 
 ### Backend
@@ -79,8 +88,18 @@ cd client
 npm run dev
 ```
 
+### Running the frontend-only demo
+
+Run the frontend without `VITE_API_URL` set. The app will start MSW automatically and mock the
+API in the browser.
+
 The API will be available at `http://localhost:5000`
 The frontend will be available at `http://localhost:5173`
+
+### GitHub Pages (static)
+
+The frontend is configured to work under the repository subpath.
+Ensure `client/public/mockServiceWorker.js` is committed (required for MSW in production demos).
 
 ## API Endpoints
 
