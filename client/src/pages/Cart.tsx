@@ -36,7 +36,8 @@ const Cart: React.FC = () => {
                 'response' in err &&
                 typeof (err as { response?: unknown }).response === 'object' &&
                 (err as { response?: { data?: { message?: string } } }).response?.data?.message
-                    ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    ? (err as { response?: { data?: { message?: string } } }).response?.data
+                          ?.message
                     : undefined;
 
             setError(maybeMessage || 'Checkout failed');
@@ -49,7 +50,9 @@ const Cart: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center py-20">
                         <div className="text-6xl mb-4">🛒</div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                            Your cart is empty
+                        </h2>
                         <p className="text-gray-600 mb-8">Add some products to get started!</p>
                         <button
                             onClick={() => navigate('/products')}
@@ -98,7 +101,9 @@ const Cart: React.FC = () => {
                                     >
                                         -
                                     </button>
-                                    <span className="w-12 text-center font-semibold">{item.quantity}</span>
+                                    <span className="w-12 text-center font-semibold">
+                                        {item.quantity}
+                                    </span>
                                     <button
                                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                         disabled={item.quantity >= item.stock}
@@ -139,7 +144,9 @@ const Cart: React.FC = () => {
                                 disabled={createOrderMutation.isPending}
                                 className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {createOrderMutation.isPending ? 'Processing...' : 'Proceed to Checkout'}
+                                {createOrderMutation.isPending
+                                    ? 'Processing...'
+                                    : 'Proceed to Checkout'}
                             </button>
                             <button
                                 onClick={clearCart}

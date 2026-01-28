@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const API_URL =
-    (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_URL ||
-    'http://localhost:5000/api/v1';
+    (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_URL || '/api/v1';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -41,8 +40,9 @@ api.interceptors.response.use(
                     refreshPromise = axios
                         .post(`${API_URL}/auth/refresh`, {}, { withCredentials: true })
                         .then((refreshResponse) => {
-                            const accessToken = refreshResponse.data?.data
-                                ?.accessToken as string | undefined;
+                            const accessToken = refreshResponse.data?.data?.accessToken as
+                                | string
+                                | undefined;
                             if (!accessToken) {
                                 throw error;
                             }
@@ -71,7 +71,7 @@ api.interceptors.response.use(
         }
 
         return Promise.reject(error);
-    }
+    },
 );
 
 export type ApiResponse<T> = {
@@ -144,8 +144,7 @@ export interface Order {
 export const authAPI = {
     register: (email: string, password: string, name: string) =>
         api.post('/auth/register', { email, password, name }),
-    login: (email: string, password: string) =>
-        api.post('/auth/login', { email, password }),
+    login: (email: string, password: string) => api.post('/auth/login', { email, password }),
     refresh: () => api.post('/auth/refresh', {}),
     logout: () => api.post('/auth/logout', {}),
     me: () => api.get<ApiResponse<{ user: User }>>('/auth/me'),
@@ -172,8 +171,12 @@ export const categoriesAPI = {
 export const ordersAPI = {
     create: (items: OrderItem[]) => api.post('/orders', { items }),
     getMyOrders: () => api.get<ApiResponse<Order[]>>('/orders/me'),
-    getAllAdmin: (params?: { page?: number; limit?: number; userId?: string; status?: OrderStatus }) =>
-        api.get<ApiResponse<PaginatedResult<Order>>>('/orders', { params }),
+    getAllAdmin: (params?: {
+        page?: number;
+        limit?: number;
+        userId?: string;
+        status?: OrderStatus;
+    }) => api.get<ApiResponse<PaginatedResult<Order>>>('/orders', { params }),
     updateStatusAdmin: (orderId: string, status: OrderStatus) =>
         api.patch<ApiResponse<Order>>(`/orders/${orderId}/status`, { status }),
 };

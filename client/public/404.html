@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ShopCraft</title>
+    </head>
+    <body>
+        <script>
+            (function () {
+                var segmentCount = 1;
+                var l = window.location;
+                var segments = l.pathname.split('/');
+                var base = segments.slice(0, 1 + segmentCount).join('/');
+                var path = segments.slice(1 + segmentCount).join('/');
+                var redirect = base + '/?/' + path + (l.search || '') + (l.hash || '');
+                l.replace(l.origin + redirect);
+            })();
+        </script>
+    </body>
+</html>

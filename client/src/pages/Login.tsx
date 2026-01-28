@@ -44,7 +44,8 @@ const Login: React.FC = () => {
                 'response' in err &&
                 typeof (err as { response?: unknown }).response === 'object' &&
                 (err as { response?: { data?: { message?: string } } }).response?.data?.message
-                    ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    ? (err as { response?: { data?: { message?: string } } }).response?.data
+                          ?.message
                     : undefined;
 
             setError(maybeMessage || 'Login failed');
@@ -70,7 +71,10 @@ const Login: React.FC = () => {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="email"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
                                 Email Address
                             </label>
                             <input
@@ -84,7 +88,10 @@ const Login: React.FC = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="password"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
                                 Password
                             </label>
                             <input
@@ -109,7 +116,10 @@ const Login: React.FC = () => {
                     <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
                             Don't have an account?{' '}
-                            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+                            <Link
+                                to="/register"
+                                className="text-blue-600 hover:text-blue-700 font-medium"
+                            >
                                 Sign up
                             </Link>
                         </p>

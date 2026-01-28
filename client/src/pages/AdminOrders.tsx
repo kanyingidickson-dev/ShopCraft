@@ -47,18 +47,32 @@ const AdminOrders: React.FC = () => {
                     <table className="min-w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Order</th>
-                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Customer</th>
-                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Status</th>
-                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Update Status</th>
-                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Total</th>
-                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Created</th>
+                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
+                                    Order
+                                </th>
+                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
+                                    Customer
+                                </th>
+                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
+                                    Status
+                                </th>
+                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
+                                    Update Status
+                                </th>
+                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
+                                    Total
+                                </th>
+                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
+                                    Created
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {rows.map((o) => (
                                 <tr key={o.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{o.id.slice(0, 8)}...</td>
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                        {o.id.slice(0, 8)}...
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
                                         {o.user?.email || o.userId}
                                     </td>
@@ -68,7 +82,12 @@ const AdminOrders: React.FC = () => {
                                             className="border border-gray-200 rounded-lg px-2 py-1 text-sm"
                                             value={o.status}
                                             disabled={updateStatusMutation.isPending}
-                                            onChange={(e) => handleStatusChange(o.id, e.target.value as OrderStatus)}
+                                            onChange={(e) =>
+                                                handleStatusChange(
+                                                    o.id,
+                                                    e.target.value as OrderStatus,
+                                                )
+                                            }
                                         >
                                             <option value="PENDING">PENDING</option>
                                             <option value="PAID">PAID</option>
@@ -77,7 +96,9 @@ const AdminOrders: React.FC = () => {
                                             <option value="CANCELLED">CANCELLED</option>
                                         </select>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">${Number(o.total).toFixed(2)}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                        ${Number(o.total).toFixed(2)}
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
                                         {new Date(o.createdAt).toLocaleString()}
                                     </td>

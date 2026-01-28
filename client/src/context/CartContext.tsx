@@ -40,9 +40,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const existingItem = prevItems.find((item) => item.id === product.id);
             if (existingItem) {
                 return prevItems.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + quantity }
-                        : item
+                    item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item,
                 );
             }
             return [...prevItems, { ...product, quantity }];
@@ -59,9 +57,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
         setItems((prevItems) =>
-            prevItems.map((item) =>
-                item.id === productId ? { ...item, quantity } : item
-            )
+            prevItems.map((item) => (item.id === productId ? { ...item, quantity } : item)),
         );
     };
 

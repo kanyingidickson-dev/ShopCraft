@@ -65,7 +65,10 @@ const Orders: React.FC = () => {
                 ) : (
                     <div className="space-y-6">
                         {orders.map((order) => (
-                            <div key={order.id} className="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div
+                                key={order.id}
+                                className="bg-white rounded-xl shadow-md overflow-hidden"
+                            >
                                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -88,7 +91,7 @@ const Orders: React.FC = () => {
                                         </div>
                                         <span
                                             className={`px-4 py-2 rounded-full font-semibold text-sm ${getStatusColor(
-                                                order.status
+                                                order.status,
                                             )}`}
                                         >
                                             {order.status}
@@ -96,7 +99,9 @@ const Orders: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="p-6">
-                                    <h3 className="font-semibold text-gray-900 mb-4">Order Items</h3>
+                                    <h3 className="font-semibold text-gray-900 mb-4">
+                                        Order Items
+                                    </h3>
                                     <div className="space-y-3">
                                         {order.items.map((item) => (
                                             <div
@@ -108,8 +113,12 @@ const Orders: React.FC = () => {
                                                         <span className="text-2xl">🛍️</span>
                                                     </div>
                                                     <div>
-                                                        <p className="font-semibold text-gray-900">{item.product.name}</p>
-                                                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                                                        <p className="font-semibold text-gray-900">
+                                                            {item.product.name}
+                                                        </p>
+                                                        <p className="text-sm text-gray-600">
+                                                            Quantity: {item.quantity}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <p className="font-semibold text-gray-900">

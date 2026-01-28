@@ -54,7 +54,8 @@ const Register: React.FC = () => {
                 'response' in err &&
                 typeof (err as { response?: unknown }).response === 'object' &&
                 (err as { response?: { data?: { message?: string } } }).response?.data?.message
-                    ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                    ? (err as { response?: { data?: { message?: string } } }).response?.data
+                          ?.message
                     : undefined;
 
             setError(maybeMessage || 'Registration failed');
@@ -72,7 +73,11 @@ const Register: React.FC = () => {
                         <p className="mt-2 text-gray-600">Join ShopCraft today</p>
                     </div>
 
-                    {(error || errors.name?.message || errors.email?.message || errors.password?.message || errors.confirmPassword?.message) && (
+                    {(error ||
+                        errors.name?.message ||
+                        errors.email?.message ||
+                        errors.password?.message ||
+                        errors.confirmPassword?.message) && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
                             {error ||
                                 errors.name?.message ||
@@ -84,7 +89,10 @@ const Register: React.FC = () => {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="name"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
                                 Full Name
                             </label>
                             <input
@@ -98,7 +106,10 @@ const Register: React.FC = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="email"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
                                 Email Address
                             </label>
                             <input
@@ -112,7 +123,10 @@ const Register: React.FC = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="password"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
                                 Password
                             </label>
                             <input
@@ -126,7 +140,10 @@ const Register: React.FC = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="confirmPassword"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
                                 Confirm Password
                             </label>
                             <input
@@ -151,7 +168,10 @@ const Register: React.FC = () => {
                     <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
                             Already have an account?{' '}
-                            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                            <Link
+                                to="/login"
+                                className="text-blue-600 hover:text-blue-700 font-medium"
+                            >
                                 Sign in
                             </Link>
                         </p>

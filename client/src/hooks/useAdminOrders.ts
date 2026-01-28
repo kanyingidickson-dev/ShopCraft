@@ -9,7 +9,14 @@ export const useAdminOrdersQuery = (params: {
     status?: OrderStatus;
 }) => {
     return useQuery<PaginatedResult<Order>>({
-        queryKey: ['orders', 'admin', params.page, params.limit, params.userId ?? '', params.status ?? ''],
+        queryKey: [
+            'orders',
+            'admin',
+            params.page,
+            params.limit,
+            params.userId ?? '',
+            params.status ?? '',
+        ],
         queryFn: async () => {
             const res = await ordersAPI.getAllAdmin(params);
             return res.data.data as PaginatedResult<Order>;
