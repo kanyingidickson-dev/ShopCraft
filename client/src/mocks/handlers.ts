@@ -167,7 +167,8 @@ export const handlers = [
         const sort = (url.searchParams.get('sort') ?? 'createdAt') as
             | 'createdAt'
             | 'price'
-            | 'name';
+            | 'name'
+            | 'rating';
         const order = (url.searchParams.get('order') ?? 'desc') as 'asc' | 'desc';
         const page = Number(url.searchParams.get('page') ?? 1);
         const limit = Number(url.searchParams.get('limit') ?? 20);
@@ -198,6 +199,8 @@ export const handlers = [
             items.sort((a, b) => a.name.localeCompare(b.name));
         } else if (sort === 'price') {
             items.sort((a, b) => Number(a.price) - Number(b.price));
+        } else if (sort === 'rating') {
+            items.sort((a, b) => Number(a.rating ?? 0) - Number(b.rating ?? 0));
         }
 
         if (order === 'desc') {

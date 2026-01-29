@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useCreateOrderMutation } from '../hooks/useOrders';
+import { getProductImageSrc } from '../utils/productMedia';
 
 const Cart: React.FC = () => {
     const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
@@ -56,7 +57,7 @@ const Cart: React.FC = () => {
                         <p className="text-gray-600 mb-8">Add some products to get started!</p>
                         <button
                             onClick={() => navigate('/products')}
-                            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
+                            className="px-8 py-3 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
                         >
                             Browse Products
                         </button>
@@ -69,7 +70,7 @@ const Cart: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-4xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8">Shopping Cart</h1>
 
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
@@ -82,19 +83,26 @@ const Cart: React.FC = () => {
                         {items.map((item) => (
                             <div
                                 key={item.id}
-                                className="bg-white rounded-xl shadow-md p-6 flex items-center space-x-6"
+                                className="bg-white rounded-xl shadow-md p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
                             >
-                                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <span className="text-3xl">🛍️</span>
+                                <div className="w-full sm:w-24 h-28 sm:h-24 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                                    <img
+                                        src={getProductImageSrc(item)}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 min-w-0">
                                     <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
-                                    <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.description}</p>
                                     <p className="text-xl font-bold text-gray-900 mt-2">
                                         ${Number(item.price).toFixed(2)}
                                     </p>
                                 </div>
-                                <div className="flex items-center space-x-3">
+                                <div className="flex items-center justify-between sm:justify-start sm:items-center gap-4">
+                                    <div className="flex items-center space-x-3">
                                     <button
                                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                         className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold transition-colors"
@@ -111,13 +119,14 @@ const Cart: React.FC = () => {
                                     >
                                         +
                                     </button>
+                                    </div>
+                                    <button
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="text-red-600 hover:text-red-700 font-semibold"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => removeFromCart(item.id)}
-                                    className="text-red-600 hover:text-red-700 font-medium"
-                                >
-                                    Remove
-                                </button>
                             </div>
                         ))}
                     </div>
@@ -142,7 +151,7 @@ const Cart: React.FC = () => {
                             <button
                                 onClick={handleCheckout}
                                 disabled={createOrderMutation.isPending}
-                                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {createOrderMutation.isPending
                                     ? 'Processing...'

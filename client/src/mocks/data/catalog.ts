@@ -22,6 +22,8 @@ const featuredProducts: Product[] = [
         name: 'Wireless Headphones',
         description: 'Noise-cancelling over-ear headphones with premium sound and all-day comfort.',
         price: 149.99,
+        rating: makeRating('p1'),
+        reviewCount: makeReviewCount('p1'),
         stock: 12,
         category: categoryByName['Electronics'],
     },
@@ -31,6 +33,8 @@ const featuredProducts: Product[] = [
         description:
             'A sleek smartwatch with fitness tracking, notifications, and long battery life.',
         price: 199.0,
+        rating: makeRating('p2'),
+        reviewCount: makeReviewCount('p2'),
         stock: 7,
         category: categoryByName['Electronics'],
     },
@@ -39,6 +43,8 @@ const featuredProducts: Product[] = [
         name: 'Running Shoes',
         description: 'Lightweight performance runners designed for daily training and comfort.',
         price: 129.5,
+        rating: makeRating('p3'),
+        reviewCount: makeReviewCount('p3'),
         stock: 18,
         category: categoryByName['Sports & Outdoors'],
     },
@@ -47,6 +53,8 @@ const featuredProducts: Product[] = [
         name: 'Laptop Stand',
         description: 'Ergonomic aluminum laptop stand for better posture and desk aesthetics.',
         price: 59.99,
+        rating: makeRating('p4'),
+        reviewCount: makeReviewCount('p4'),
         stock: 9,
         category: categoryByName['Electronics'],
     },
@@ -55,6 +63,8 @@ const featuredProducts: Product[] = [
         name: 'Coffee Maker',
         description: 'Compact coffee maker with programmable brew and consistent extraction.',
         price: 89.0,
+        rating: makeRating('p5'),
+        reviewCount: makeReviewCount('p5'),
         stock: 5,
         category: categoryByName['Home & Kitchen'],
     },
@@ -63,6 +73,8 @@ const featuredProducts: Product[] = [
         name: 'LED Desk Lamp',
         description: 'Adjustable LED desk lamp with warm/cool modes and a minimal footprint.',
         price: 39.99,
+        rating: makeRating('p6'),
+        reviewCount: makeReviewCount('p6'),
         stock: 14,
         category: categoryByName['Home & Kitchen'],
     },
@@ -83,6 +95,26 @@ const rng = mulberry32(1337);
 const randInt = (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
 const randFloat = (min: number, max: number) => rng() * (max - min) + min;
 const pick = <T,>(items: T[]) => items[randInt(0, items.length - 1)];
+
+function stableHash(value: string) {
+    let h = 2166136261;
+    for (let i = 0; i < value.length; i++) {
+        h ^= value.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+}
+
+function makeRating(seed: string) {
+    const h = stableHash(seed);
+    const base = 3.3 + ((h % 170) / 100);
+    return Math.max(3.0, Math.min(5.0, Number(base.toFixed(1))));
+}
+
+function makeReviewCount(seed: string) {
+    const h = stableHash(`reviews:${seed}`);
+    return 12 + (h % 2988);
+}
 
 const templates: Record<
     string,
@@ -176,11 +208,15 @@ const generateProducts = () => {
             const stock = randInt(0, 120);
             const description = `${pick(tpl.desc1)} ${pick(tpl.desc2)}`;
 
+            const id = `p_${cat.id}_${String(i + 1).padStart(3, '0')}_${sku}`;
+
             out.push({
-                id: `p_${cat.id}_${String(i + 1).padStart(3, '0')}_${sku}`,
+                id,
                 name,
                 description,
                 price,
+                rating: makeRating(id),
+                reviewCount: makeReviewCount(id),
                 stock,
                 category: cat,
             });

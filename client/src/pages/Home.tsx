@@ -20,7 +20,7 @@ const Home: React.FC = () => {
                             </span>
                         </div>
 
-                        <h1 className="text-6xl md:text-7xl font-extrabold text-[#0F172A] tracking-tight mb-8 leading-[0.95]">
+                        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[#0F172A] tracking-tight mb-8 leading-[0.95]">
                             Curating the <br />
                             <span className="text-[#0F172A]">future</span> of retail.
                         </h1>

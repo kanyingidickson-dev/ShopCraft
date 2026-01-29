@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useProductsQuery } from '../hooks/useProducts';
 import { useCategoriesQuery } from '../hooks/useCategories';
+import { getProductImageSrc } from '../utils/productMedia';
 
 const Products: React.FC = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const q = (searchParams.get('q') ?? '').trim();
     const categoryId = (searchParams.get('categoryId') ?? '').trim();
 
-    const sort = (searchParams.get('sort') ?? 'createdAt') as 'createdAt' | 'price' | 'name';
+    const sort = (searchParams.get('sort') ?? 'createdAt') as 'createdAt' | 'price' | 'name' | 'rating';
     const order = (searchParams.get('order') ?? 'desc') as 'asc' | 'desc';
 
     const minPriceRaw = searchParams.get('minPrice');
@@ -32,120 +33,159 @@ const Products: React.FC = () => {
     const [notification, setNotification] = useState('');
     const { addToCart } = useCart();
 
-    const [minPriceInput, setMinPriceInput] = useState(minPriceRaw ?? '');
-    const [maxPriceInput, setMaxPriceInput] = useState(maxPriceRaw ?? '');
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
-    const escapeXml = (value: string) =>
-        value
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
+    const priceKey = `${minPriceRaw ?? ''}|${maxPriceRaw ?? ''}`;
 
-    const hashString = (value: string) => {
-        let h = 2166136261;
-        for (let i = 0; i < value.length; i++) {
-            h ^= value.charCodeAt(i);
-            h = Math.imul(h, 16777619);
-        }
-        return h >>> 0;
-    };
+    const FiltersPanel = useMemo(() => {
+        const PriceFilter = ({ onApplied }: { onApplied: () => void }) => {
+            const [minPriceInput, setMinPriceInput] = useState(minPriceRaw ?? '');
+            const [maxPriceInput, setMaxPriceInput] = useState(maxPriceRaw ?? '');
 
-    const makeProductThumbDataUrl = (product: Product) => {
-        const id = product.id ?? product.name;
-        const categoryName = product.category?.name ?? 'Shop';
-
-        const palettes: Record<string, { bg1: string; bg2: string; accent: string }> = {
-            Electronics: { bg1: '#EEF2FF', bg2: '#E0E7FF', accent: '#1D4ED8' },
-            Fashion: { bg1: '#FFF7ED', bg2: '#FFEDD5', accent: '#B45309' },
-            'Home & Kitchen': { bg1: '#ECFDF5', bg2: '#D1FAE5', accent: '#047857' },
-            Beauty: { bg1: '#FDF2F8', bg2: '#FCE7F3', accent: '#BE185D' },
-            Books: { bg1: '#F1F5F9', bg2: '#E2E8F0', accent: '#0F172A' },
-            'Sports & Outdoors': { bg1: '#ECFEFF', bg2: '#CFFAFE', accent: '#0E7490' },
-            'Toys & Games': { bg1: '#FEFCE8', bg2: '#FEF9C3', accent: '#854D0E' },
-            Health: { bg1: '#EFF6FF', bg2: '#DBEAFE', accent: '#1E40AF' },
+            return (
+                <div className="mb-2">
+                    <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest mb-3">
+                        Price
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                                Min
+                            </label>
+                            <input
+                                value={minPriceInput}
+                                onChange={(e) => setMinPriceInput(e.target.value)}
+                                inputMode="decimal"
+                                placeholder="0"
+                                className="w-full h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                                Max
+                            </label>
+                            <input
+                                value={maxPriceInput}
+                                onChange={(e) => setMaxPriceInput(e.target.value)}
+                                inputMode="decimal"
+                                placeholder="999"
+                                className="w-full h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm"
+                            />
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const next = new URLSearchParams(searchParams);
+                            const min = minPriceInput.trim();
+                            const max = maxPriceInput.trim();
+                            if (min) next.set('minPrice', min);
+                            else next.delete('minPrice');
+                            if (max) next.set('maxPrice', max);
+                            else next.delete('maxPrice');
+                            setSearchParams(next);
+                            onApplied();
+                        }}
+                        className="mt-3 w-full h-10 bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold rounded-lg transition-colors"
+                    >
+                        Apply
+                    </button>
+                </div>
+            );
         };
 
-        const palette = palettes[categoryName] ?? { bg1: '#F8FAFC', bg2: '#E2E8F0', accent: '#0F172A' };
-        const seed = hashString(`${id}:${categoryName}:${product.name}`);
-        const a = 20 + (seed % 50);
-        const b = 30 + ((seed >>> 8) % 50);
-        const c = 40 + ((seed >>> 16) % 50);
+        return (
+            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 tracking-wide">Filters</h2>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const next = new URLSearchParams(searchParams);
+                            next.delete('categoryId');
+                            next.delete('minPrice');
+                            next.delete('maxPrice');
+                            next.delete('sort');
+                            next.delete('order');
+                            setSearchParams(next);
+                        }}
+                        className="text-xs font-semibold text-gray-600 hover:text-gray-900"
+                    >
+                        Reset
+                    </button>
+                </div>
 
-        const safeName = escapeXml(product.name);
-        const safeCategory = escapeXml(categoryName);
-        const shortName = safeName.length > 28 ? `${safeName.slice(0, 27)}…` : safeName;
+                <div className="mb-6">
+                    <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest mb-3">
+                        Category
+                    </h3>
+                    <div className="space-y-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const next = new URLSearchParams(searchParams);
+                                next.delete('categoryId');
+                                setSearchParams(next);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                                !categoryId
+                                    ? 'bg-gray-900 text-white border-gray-900'
+                                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                            }`}
+                        >
+                            All Categories
+                        </button>
 
-        const iconPaths: Record<string, string> = {
-            Electronics:
-                'M240 640h320c22 0 40-18 40-40V360c0-22-18-40-40-40H240c-22 0-40 18-40 40v240c0 22 18 40 40 40zm60-60V380h200v200H300z',
-            Fashion:
-                'M270 360l60-60h140l60 60-60 60v240H330V420l-60-60z',
-            'Home & Kitchen':
-                'M320 380c0-44 36-80 80-80h40c44 0 80 36 80 80v40H320v-40zm-40 80h320v180c0 44-36 80-80 80H400c-44 0-80-36-80-80V460z',
-            Beauty:
-                'M380 300h40v90h60v70h-160v-70h60v-90zm-40 230h200v110c0 44-36 80-80 80h-40c-44 0-80-36-80-80V530z',
-            Books:
-                'M300 320h220c33 0 60 27 60 60v260c-12-10-28-16-46-16H300c-33 0-60-27-60-60V380c0-33 27-60 60-60zm20 70v160h190V390H320z',
-            'Sports & Outdoors':
-                'M270 520h80v-60h100v60h80v80h-80v60H350v-60h-80v-80z',
-            'Toys & Games':
-                'M300 420h90v-90h110v90h90v110h-90v90H390v-90h-90V420zm110 20v70h70v-70h-70z',
-            Health:
-                'M360 330h80v90h90v80h-90v90h-80v-90h-90v-80h90v-90z',
-        };
+                        {categories.map((c) => (
+                            <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => {
+                                    const next = new URLSearchParams(searchParams);
+                                    next.set('categoryId', c.id);
+                                    setSearchParams(next);
+                                }}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                                    categoryId === c.id
+                                        ? 'bg-gray-900 text-white border-gray-900'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                }`}
+                            >
+                                {c.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-        const icon = iconPaths[categoryName] ?? iconPaths.Books;
+                <PriceFilter key={priceKey} onApplied={() => setFiltersOpen(false)} />
+            </div>
+        );
+    }, [categories, categoryId, priceKey, searchParams, setSearchParams, minPriceRaw, maxPriceRaw]);
 
-        const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${palette.bg1}"/>
-      <stop offset="1" stop-color="${palette.bg2}"/>
-    </linearGradient>
-    <radialGradient id="r" cx="35%" cy="30%" r="70%">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
+    const RatingStars = ({ value }: { value: number }) => {
+        const full = Math.floor(value);
+        const half = value - full >= 0.5;
+        const stars = Array.from({ length: 5 }, (_, i) => {
+            const idx = i + 1;
+            const filled = idx <= full;
+            const isHalf = !filled && half && idx === full + 1;
+            return (
+                <span key={idx} className="inline-block">
+                    <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 20 20"
+                        fill={filled || isHalf ? '#F59E0B' : '#E5E7EB'}
+                    >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.965a1 1 0 00.95.69h4.17c.969 0 1.371 1.24.588 1.81l-3.372 2.45a1 1 0 00-.364 1.118l1.287 3.965c.3.921-.755 1.688-1.54 1.118l-3.372-2.45a1 1 0 00-1.175 0l-3.372 2.45c-.784.57-1.838-.197-1.539-1.118l1.287-3.965a1 1 0 00-.364-1.118L2.05 9.392c-.783-.57-.38-1.81.588-1.81h4.17a1 1 0 00.95-.69l1.291-3.965z" />
+                    </svg>
+                    {isHalf ? (
+                        <span className="sr-only">half</span>
+                    ) : null}
+                </span>
+            );
+        });
 
-  <rect width="800" height="1000" fill="url(#g)"/>
-  <circle cx="${180 + a}" cy="${160 + b}" r="${140 + (a % 40)}" fill="url(#r)"/>
-  <circle cx="${640 - b}" cy="${260 + c}" r="${160 + (b % 60)}" fill="url(#r)"/>
-
-  <rect x="56" y="56" width="688" height="888" rx="56" fill="#FFFFFF" opacity="0.72"/>
-
-  <text x="96" y="132" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="22" font-weight="800" fill="#475569">${safeCategory.toUpperCase()}</text>
-  <text x="96" y="184" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="34" font-weight="900" fill="#0F172A">${shortName}</text>
-
-  <g transform="translate(0,0)">
-    <rect x="96" y="240" width="608" height="560" rx="40" fill="#FFFFFF" opacity="0.9"/>
-    <path d="${icon}" fill="${palette.accent}" opacity="0.92"/>
-    <path d="M160 820h480" stroke="#CBD5E1" stroke-width="6" stroke-linecap="round"/>
-    <path d="M160 864h340" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
-  </g>
-
-  <rect x="96" y="900" width="210" height="52" rx="26" fill="${palette.accent}" opacity="0.12"/>
-  <text x="116" y="934" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="18" font-weight="800" fill="${palette.accent}">ShopCraft</text>
-</svg>`;
-
-        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-    };
-
-    const getProductImageSrc = (product: Product) => {
-        const baseUrl = import.meta.env.BASE_URL;
-        const images: Record<string, string> = {
-            'Wireless Headphones': `${baseUrl}images/headphones.png`,
-            'Smart Watch': `${baseUrl}images/watch.png`,
-            'Running Shoes': `${baseUrl}images/shoes.png`,
-            'Laptop Stand': `${baseUrl}images/laptop_stand.png`,
-            'Coffee Maker': `${baseUrl}images/coffee_maker.png`,
-            'LED Desk Lamp': `${baseUrl}images/lamp.png`,
-        };
-
-        return images[product.name] ?? makeProductThumbDataUrl(product);
+        return <div className="flex items-center gap-1">{stars}</div>;
     };
 
     const handleAddToCart = (product: Product) => {
@@ -204,6 +244,30 @@ const Products: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] py-10">
+            {filtersOpen && (
+                <div className="fixed inset-0 z-50 lg:hidden">
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-black/40"
+                        aria-label="Close filters"
+                        onClick={() => setFiltersOpen(false)}
+                    />
+                    <div className="absolute left-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl border-r border-gray-200 p-4 overflow-auto">
+                        <div className="h-12 flex items-center justify-between mb-2">
+                            <div className="text-sm font-extrabold text-gray-900">Filters</div>
+                            <button
+                                type="button"
+                                onClick={() => setFiltersOpen(false)}
+                                className="w-9 h-9 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+                                aria-label="Close"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        {FiltersPanel}
+                    </div>
+                </div>
+            )}
             {notification && (
                 <div className="fixed top-24 right-8 bg-gray-900/90 backdrop-blur-md text-white px-8 py-4 rounded-2xl shadow-2xl z-50 animate-slide-in flex items-center space-x-3 border border-gray-800">
                     <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -247,147 +311,45 @@ const Products: React.FC = () => {
                             ) : null}
                         </div>
 
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                            Sort
-                            <select
-                                value={`${sort}:${order}`}
-                                onChange={(e) => {
-                                    const [nextSort, nextOrder] = e.target.value.split(':') as [
-                                        'createdAt' | 'price' | 'name',
-                                        'asc' | 'desc',
-                                    ];
-                                    const next = new URLSearchParams(searchParams);
-                                    next.set('sort', nextSort);
-                                    next.set('order', nextOrder);
-                                    window.location.hash = `#/products?${next.toString()}`;
-                                }}
-                                className="h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm font-semibold text-gray-800"
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setFiltersOpen(true)}
+                                className="lg:hidden h-10 px-3 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-800"
                             >
-                                <option value="createdAt:desc">Featured</option>
-                                <option value="price:asc">Price: Low to High</option>
-                                <option value="price:desc">Price: High to Low</option>
-                                <option value="name:asc">Name: A to Z</option>
-                            </select>
-                        </label>
+                                Filters
+                            </button>
+
+                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                Sort
+                                <select
+                                    value={`${sort}:${order}`}
+                                    onChange={(e) => {
+                                        const [nextSort, nextOrder] = e.target.value.split(':') as [
+                                            'createdAt' | 'price' | 'name' | 'rating',
+                                            'asc' | 'desc',
+                                        ];
+                                        const next = new URLSearchParams(searchParams);
+                                        next.set('sort', nextSort);
+                                        next.set('order', nextOrder);
+                                        setSearchParams(next);
+                                    }}
+                                    className="h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm font-semibold text-gray-800"
+                                >
+                                    <option value="createdAt:desc">Featured</option>
+                                    <option value="rating:desc">Customer rating</option>
+                                    <option value="price:asc">Price: Low to High</option>
+                                    <option value="price:desc">Price: High to Low</option>
+                                    <option value="name:asc">Name: A to Z</option>
+                                </select>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <aside className="lg:col-span-3">
-                        <div className="bg-white rounded-2xl border border-gray-200 p-5 sticky top-20">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-sm font-extrabold text-gray-900 tracking-wide">
-                                    Filters
-                                </h2>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const next = new URLSearchParams(searchParams);
-                                        next.delete('categoryId');
-                                        next.delete('minPrice');
-                                        next.delete('maxPrice');
-                                        next.delete('sort');
-                                        next.delete('order');
-                                        window.location.hash = `#/products?${next.toString()}`;
-                                        setMinPriceInput('');
-                                        setMaxPriceInput('');
-                                    }}
-                                    className="text-xs font-semibold text-gray-600 hover:text-gray-900"
-                                >
-                                    Reset
-                                </button>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest mb-3">
-                                    Category
-                                </h3>
-                                <div className="space-y-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            const next = new URLSearchParams(searchParams);
-                                            next.delete('categoryId');
-                                            window.location.hash = `#/products?${next.toString()}`;
-                                        }}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                                            !categoryId
-                                                ? 'bg-gray-900 text-white border-gray-900'
-                                                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        All Categories
-                                    </button>
-
-                                    {categories.map((c) => (
-                                        <button
-                                            key={c.id}
-                                            type="button"
-                                            onClick={() => {
-                                                const next = new URLSearchParams(searchParams);
-                                                next.set('categoryId', c.id);
-                                                window.location.hash = `#/products?${next.toString()}`;
-                                            }}
-                                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                                                categoryId === c.id
-                                                    ? 'bg-gray-900 text-white border-gray-900'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            {c.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="mb-2">
-                                <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest mb-3">
-                                    Price
-                                </h3>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                                            Min
-                                        </label>
-                                        <input
-                                            value={minPriceInput}
-                                            onChange={(e) => setMinPriceInput(e.target.value)}
-                                            inputMode="decimal"
-                                            placeholder="0"
-                                            className="w-full h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                                            Max
-                                        </label>
-                                        <input
-                                            value={maxPriceInput}
-                                            onChange={(e) => setMaxPriceInput(e.target.value)}
-                                            inputMode="decimal"
-                                            placeholder="999"
-                                            className="w-full h-10 px-3 border border-gray-300 rounded-lg bg-white text-sm"
-                                        />
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const next = new URLSearchParams(searchParams);
-                                        const min = minPriceInput.trim();
-                                        const max = maxPriceInput.trim();
-                                        if (min) next.set('minPrice', min);
-                                        else next.delete('minPrice');
-                                        if (max) next.set('maxPrice', max);
-                                        else next.delete('maxPrice');
-                                        window.location.hash = `#/products?${next.toString()}`;
-                                    }}
-                                    className="mt-3 w-full h-10 bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold rounded-lg transition-colors"
-                                >
-                                    Apply
-                                </button>
-                            </div>
-                        </div>
+                    <aside className="hidden lg:block lg:col-span-3">
+                        <div className="sticky top-20">{FiltersPanel}</div>
                     </aside>
 
                     <section className="lg:col-span-9">
@@ -441,6 +403,18 @@ const Products: React.FC = () => {
                                     <p className="text-sm text-gray-600 mb-5 line-clamp-2 leading-relaxed font-medium">
                                         {product.description}
                                     </p>
+
+                                    <div className="flex items-center justify-between mb-5">
+                                        <div className="flex items-center gap-2">
+                                            <RatingStars value={product.rating ?? 4.2} />
+                                            <span className="text-xs font-semibold text-gray-700">
+                                                {(product.rating ?? 4.2).toFixed(1)}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs font-semibold text-gray-500">
+                                            ({product.reviewCount ?? 120})
+                                        </span>
+                                    </div>
 
                                     <div className="mt-auto">
                                         <div className="flex items-center justify-between mb-6">

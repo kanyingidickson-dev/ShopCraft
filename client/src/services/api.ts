@@ -94,6 +94,8 @@ export interface Product {
     name: string;
     description: string;
     price: number | string;
+    rating?: number;
+    reviewCount?: number;
     stock: number;
     category?: {
         id: string;
@@ -158,7 +160,7 @@ export const productsAPI = {
         categoryId?: string;
         minPrice?: number;
         maxPrice?: number;
-        sort?: 'createdAt' | 'price' | 'name';
+        sort?: 'createdAt' | 'price' | 'name' | 'rating';
         order?: 'asc' | 'desc';
     }) => api.get<ApiResponse<PaginatedResult<Product>>>('/products', { params }),
     getById: (id: string) => api.get<ApiResponse<Product>>(`/products/${id}`),

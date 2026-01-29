@@ -9,7 +9,7 @@ export type UseProductsQueryParams = {
     categoryId?: string;
     minPrice?: number;
     maxPrice?: number;
-    sort?: 'createdAt' | 'price' | 'name';
+    sort?: 'createdAt' | 'price' | 'name' | 'rating';
     order?: 'asc' | 'desc';
 };
 
