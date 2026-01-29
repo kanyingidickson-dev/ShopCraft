@@ -172,14 +172,35 @@ const Footer: React.FC = () => {
                     <div className="flex items-center gap-2 text-gray-500">
                         <span className="text-xs font-semibold">Payments</span>
                         <span className="inline-flex items-center gap-2">
-                            <span className="px-2 py-1 rounded border border-gray-200 text-[11px] font-bold text-gray-700">
-                                VISA
+                            <span className="h-7 w-[54px] rounded border border-gray-200 bg-white flex items-center justify-center">
+                                <svg viewBox="0 0 60 24" className="h-4" aria-label="Visa" role="img">
+                                    <rect x="0" y="0" width="60" height="24" rx="4" fill="#ffffff" />
+                                    <path
+                                        d="M23.8 17.8l2.3-11.5h3.3l-2.3 11.5h-3.3zm-6.1-11.5l-3.1 7.9-.4-2.2-1.1-5.7h-3.5l2.3 11.5h3.6l5.6-11.5h-3.4zm25.2 11.5h3.1l-2.7-11.5h-2.9c-.7 0-1.2.2-1.5.9l-4.5 10.6h3.4l.6-1.7h4.1l.4 1.7zm-3.6-4.2l1.2-3.4.8 3.4h-2z"
+                                        fill="#1434CB"
+                                    />
+                                </svg>
                             </span>
-                            <span className="px-2 py-1 rounded border border-gray-200 text-[11px] font-bold text-gray-700">
-                                MasterCard
+                            <span className="h-7 w-[54px] rounded border border-gray-200 bg-white flex items-center justify-center">
+                                <svg viewBox="0 0 60 24" className="h-4" aria-label="Mastercard" role="img">
+                                    <rect x="0" y="0" width="60" height="24" rx="4" fill="#ffffff" />
+                                    <circle cx="26" cy="12" r="6.5" fill="#EB001B" />
+                                    <circle cx="34" cy="12" r="6.5" fill="#F79E1B" />
+                                    <circle cx="30" cy="12" r="6.5" fill="#FF5F00" opacity="0.9" />
+                                </svg>
                             </span>
-                            <span className="px-2 py-1 rounded border border-gray-200 text-[11px] font-bold text-gray-700">
-                                PayPal
+                            <span className="h-7 w-[54px] rounded border border-gray-200 bg-white flex items-center justify-center">
+                                <svg viewBox="0 0 60 24" className="h-4" aria-label="PayPal" role="img">
+                                    <rect x="0" y="0" width="60" height="24" rx="4" fill="#ffffff" />
+                                    <path
+                                        d="M22 18h-3l2.3-12h6.2c2.6 0 4.2 1.2 4.2 3.5 0 3.2-2.5 5-6 5h-2l-.7 3.5zm1.2-6.1h2.2c1.8 0 3-.7 3-2.2 0-1-.7-1.5-2-1.5h-2.7l-.5 3.7z"
+                                        fill="#003087"
+                                    />
+                                    <path
+                                        d="M34.7 18h-2.9l2.2-11.4h5.8c2.5 0 4 1.2 4 3.3 0 3.1-2.4 4.9-5.9 4.9h-1.9L34.7 18zm1.2-6h2c1.8 0 3-.7 3-2.1 0-1-.7-1.5-2-1.5h-2.5l-.5 3.6z"
+                                        fill="#009CDE"
+                                    />
+                                </svg>
                             </span>
                         </span>
                     </div>

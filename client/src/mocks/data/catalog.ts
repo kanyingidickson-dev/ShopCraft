@@ -22,6 +22,7 @@ const featuredProducts: Product[] = [
         name: 'Wireless Headphones',
         description: 'Noise-cancelling over-ear headphones with premium sound and all-day comfort.',
         price: 149.99,
+        image: 'images/headphones.png',
         rating: makeRating('p1'),
         reviewCount: makeReviewCount('p1'),
         stock: 12,
@@ -33,6 +34,7 @@ const featuredProducts: Product[] = [
         description:
             'A sleek smartwatch with fitness tracking, notifications, and long battery life.',
         price: 199.0,
+        image: 'images/watch.png',
         rating: makeRating('p2'),
         reviewCount: makeReviewCount('p2'),
         stock: 7,
@@ -43,6 +45,7 @@ const featuredProducts: Product[] = [
         name: 'Running Shoes',
         description: 'Lightweight performance runners designed for daily training and comfort.',
         price: 129.5,
+        image: 'images/shoes.png',
         rating: makeRating('p3'),
         reviewCount: makeReviewCount('p3'),
         stock: 18,
@@ -53,6 +56,7 @@ const featuredProducts: Product[] = [
         name: 'Laptop Stand',
         description: 'Ergonomic aluminum laptop stand for better posture and desk aesthetics.',
         price: 59.99,
+        image: 'images/laptop_stand.png',
         rating: makeRating('p4'),
         reviewCount: makeReviewCount('p4'),
         stock: 9,
@@ -63,6 +67,7 @@ const featuredProducts: Product[] = [
         name: 'Coffee Maker',
         description: 'Compact coffee maker with programmable brew and consistent extraction.',
         price: 89.0,
+        image: 'images/coffee_maker.png',
         rating: makeRating('p5'),
         reviewCount: makeReviewCount('p5'),
         stock: 5,
@@ -73,6 +78,7 @@ const featuredProducts: Product[] = [
         name: 'LED Desk Lamp',
         description: 'Adjustable LED desk lamp with warm/cool modes and a minimal footprint.',
         price: 39.99,
+        image: 'images/lamp.png',
         rating: makeRating('p6'),
         reviewCount: makeReviewCount('p6'),
         stock: 14,
@@ -95,6 +101,29 @@ const rng = mulberry32(1337);
 const randInt = (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
 const randFloat = (min: number, max: number) => rng() * (max - min) + min;
 const pick = <T,>(items: T[]) => items[randInt(0, items.length - 1)];
+
+const imageForGeneratedProduct = (name: string) => {
+    const n = name.toLowerCase();
+
+    if (n.includes('watch')) return 'images/watch.png';
+    if (n.includes('shoe') || n.includes('sneaker') || n.includes('boot')) return 'images/shoes.png';
+    if (n.includes('lamp') || n.includes('light') || n.includes('headlamp')) return 'images/lamp.png';
+    if (n.includes('coffee')) return 'images/coffee_maker.png';
+    if (n.includes('headphone') || n.includes('earbud') || n.includes('speaker')) return 'images/headphones.png';
+    if (
+        n.includes('laptop') ||
+        n.includes('keyboard') ||
+        n.includes('mouse') ||
+        n.includes('monitor') ||
+        n.includes('webcam') ||
+        n.includes('router') ||
+        n.includes('tablet')
+    ) {
+        return 'images/laptop_stand.png';
+    }
+
+    return undefined;
+};
 
 function stableHash(value: string) {
     let h = 2166136261;
@@ -215,6 +244,7 @@ const generateProducts = () => {
                 name,
                 description,
                 price,
+                image: imageForGeneratedProduct(name),
                 rating: makeRating(id),
                 reviewCount: makeReviewCount(id),
                 stock,

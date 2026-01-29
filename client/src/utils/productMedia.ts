@@ -131,29 +131,14 @@ export const getProductImageSrc = (product: Product) => {
         'LED Desk Lamp': `${baseUrl}images/lamp.png`,
     };
 
+    if (typeof product.image === 'string' && product.image.length > 0) {
+        if (product.image.startsWith('data:')) return product.image;
+        const rel = product.image.startsWith('/') ? product.image.slice(1) : product.image;
+        return `${baseUrl}${rel}`;
+    }
+
     const direct = images[product.name];
     if (direct) return direct;
-
-    const categoryName = product.category?.name ?? 'Shop';
-
-    const pools: Record<string, string[]> = {
-        Electronics: ['headphones.png', 'watch.png', 'laptop_stand.png'],
-        Fashion: ['shoes.png', 'watch.png'],
-        'Home & Kitchen': ['lamp.png', 'coffee_maker.png', 'laptop_stand.png'],
-        Beauty: ['lamp.png', 'watch.png'],
-        Books: ['laptop_stand.png', 'lamp.png'],
-        'Sports & Outdoors': ['shoes.png', 'watch.png'],
-        'Toys & Games': ['headphones.png', 'lamp.png'],
-        Health: ['watch.png', 'coffee_maker.png'],
-        Shop: ['headphones.png', 'watch.png', 'shoes.png', 'laptop_stand.png', 'coffee_maker.png', 'lamp.png'],
-    };
-
-    const pool = pools[categoryName] ?? pools.Shop;
-    if (pool.length > 0) {
-        const seed = hashString(`${product.id ?? product.name}:${categoryName}:${product.name}`);
-        const file = pool[seed % pool.length];
-        return `${baseUrl}images/${file}`;
-    }
 
     return makeProductThumbDataUrl(product);
 };

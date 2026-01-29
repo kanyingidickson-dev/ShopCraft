@@ -94,6 +94,7 @@ export interface Product {
     name: string;
     description: string;
     price: number | string;
+    image?: string;
     rating?: number;
     reviewCount?: number;
     stock: number;

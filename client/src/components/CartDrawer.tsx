@@ -171,7 +171,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
                             type="button"
                             onClick={() => {
                                 onClose();
-                                navigate('/cart');
+                                navigate('/checkout');
                             }}
                             disabled={items.length === 0}
                             className="h-10 rounded-lg bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold disabled:opacity-40"

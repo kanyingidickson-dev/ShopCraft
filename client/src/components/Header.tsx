@@ -211,9 +211,9 @@ const Header: React.FC = () => {
 
                         {isAuthenticated ? (
                             <Link
-                                to="/orders"
+                                to="/settings"
                                 className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-gray-900"
-                                aria-label="Account"
+                                aria-label="Settings"
                             >
                                 <svg
                                     className="w-5 h-5"
@@ -284,6 +284,17 @@ const Header: React.FC = () => {
                                     }`}
                                 >
                                     Orders
+                                </Link>
+
+                                <Link
+                                    to="/settings"
+                                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                                        isActive('/settings')
+                                            ? 'bg-gray-900 text-white'
+                                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                                >
+                                    Settings
                                 </Link>
 
                                 <button

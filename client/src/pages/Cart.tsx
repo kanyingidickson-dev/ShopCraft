@@ -2,16 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { useCreateOrderMutation } from '../hooks/useOrders';
 import { getProductImageSrc } from '../utils/productMedia';
 
 const Cart: React.FC = () => {
     const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const [error, setError] = React.useState('');
 
-    const createOrderMutation = useCreateOrderMutation();
 
     const handleCheckout = async () => {
         if (!isAuthenticated || !user) {
@@ -19,30 +16,7 @@ const Cart: React.FC = () => {
             return;
         }
 
-        setError('');
-
-        try {
-            const orderItems = items.map((item) => ({
-                productId: item.id,
-                quantity: item.quantity,
-            }));
-
-            await createOrderMutation.mutateAsync(orderItems);
-            clearCart();
-            navigate('/orders');
-        } catch (err: unknown) {
-            const maybeMessage =
-                typeof err === 'object' &&
-                err !== null &&
-                'response' in err &&
-                typeof (err as { response?: unknown }).response === 'object' &&
-                (err as { response?: { data?: { message?: string } } }).response?.data?.message
-                    ? (err as { response?: { data?: { message?: string } } }).response?.data
-                          ?.message
-                    : undefined;
-
-            setError(maybeMessage || 'Checkout failed');
-        }
+        navigate('/checkout');
     };
 
     if (items.length === 0) {
@@ -71,12 +45,6 @@ const Cart: React.FC = () => {
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8">Shopping Cart</h1>
-
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-                        {error}
-                    </div>
-                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-4">
@@ -150,12 +118,9 @@ const Cart: React.FC = () => {
                             </div>
                             <button
                                 onClick={handleCheckout}
-                                disabled={createOrderMutation.isPending}
                                 className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {createOrderMutation.isPending
-                                    ? 'Processing...'
-                                    : 'Proceed to Checkout'}
+                                Proceed to Checkout
                             </button>
                             <button
                                 onClick={clearCart}

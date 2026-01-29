@@ -8,7 +8,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Products from './pages/Products';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 import Orders from './pages/Orders';
+import ProfileSettings from './pages/ProfileSettings';
 import AdminOrders from './pages/AdminOrders';
 import { AdminRoute, ProtectedRoute } from './components/RouteGuards';
 
@@ -25,10 +28,34 @@ function AppContent() {
                         <Route path="/products" element={<Products />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route
+                            path="/checkout"
+                            element={
+                                <ProtectedRoute>
+                                    <Checkout />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/checkout/success"
+                            element={
+                                <ProtectedRoute>
+                                    <CheckoutSuccess />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
                             path="/orders"
                             element={
                                 <ProtectedRoute>
                                     <Orders />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/settings"
+                            element={
+                                <ProtectedRoute>
+                                    <ProfileSettings />
                                 </ProtectedRoute>
                             }
                         />
