@@ -11,6 +11,11 @@ const Products: React.FC = () => {
     const q = (searchParams.get('q') ?? '').trim();
     const categoryId = (searchParams.get('categoryId') ?? '').trim();
 
+    const viewParam = searchParams.get('view');
+    const view = (viewParam === 'grid' || viewParam === 'list' || viewParam === 'detail'
+        ? viewParam
+        : 'grid') as 'grid' | 'list' | 'detail';
+
     const sort = (searchParams.get('sort') ?? 'createdAt') as 'createdAt' | 'price' | 'name' | 'rating';
     const order = (searchParams.get('order') ?? 'desc') as 'asc' | 'desc';
 
@@ -125,6 +130,7 @@ const Products: React.FC = () => {
                             onClick={() => {
                                 const next = new URLSearchParams(searchParams);
                                 next.delete('categoryId');
+                                next.delete('q');
                                 setSearchParams(next);
                             }}
                             className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
@@ -143,6 +149,7 @@ const Products: React.FC = () => {
                                 onClick={() => {
                                     const next = new URLSearchParams(searchParams);
                                     next.set('categoryId', c.id);
+                                    next.delete('q');
                                     setSearchParams(next);
                                 }}
                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
@@ -320,6 +327,54 @@ const Products: React.FC = () => {
                                 Filters
                             </button>
 
+                            <div className="inline-flex items-center rounded-lg border border-gray-300 bg-white overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = new URLSearchParams(searchParams);
+                                        next.set('view', 'grid');
+                                        setSearchParams(next);
+                                    }}
+                                    className={`h-10 px-3 text-sm font-semibold transition-colors ${
+                                        view === 'grid'
+                                            ? 'bg-gray-900 text-white'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    Grid
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = new URLSearchParams(searchParams);
+                                        next.set('view', 'list');
+                                        setSearchParams(next);
+                                    }}
+                                    className={`h-10 px-3 text-sm font-semibold transition-colors border-l border-gray-200 ${
+                                        view === 'list'
+                                            ? 'bg-gray-900 text-white'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    List
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = new URLSearchParams(searchParams);
+                                        next.set('view', 'detail');
+                                        setSearchParams(next);
+                                    }}
+                                    className={`h-10 px-3 text-sm font-semibold transition-colors border-l border-gray-200 ${
+                                        view === 'detail'
+                                            ? 'bg-gray-900 text-white'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    Detailed
+                                </button>
+                            </div>
+
                             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                 Sort
                                 <select
@@ -373,102 +428,190 @@ const Products: React.FC = () => {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {products.map((product) => (
-                            <div
-                                key={product.id}
-                                className="group bg-white rounded-[1.5rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col min-w-0"
-                            >
-                                <div className="relative aspect-[4/5] bg-[#F1F5F9] overflow-hidden">
-                                    <img
-                                        src={getProductImageSrc(product)}
-                                        alt={product.name}
-                                        className="block w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-[1.03]"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        {product.category && (
-                                            <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50/90 backdrop-blur-md rounded-full border border-blue-100 shadow-sm">
-                                                {product.category.name}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="p-6 flex-1 flex flex-col min-w-0">
-                                    <h3 className="text-lg font-extrabold text-[#0F172A] mb-2 group-hover:text-gray-900 transition-colors line-clamp-2">
-                                        {product.name}
-                                    </h3>
-                                    <p className="text-sm text-gray-600 mb-5 line-clamp-2 leading-relaxed font-medium">
-                                        {product.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between mb-5">
-                                        <div className="flex items-center gap-2">
-                                            <RatingStars value={product.rating ?? 4.2} />
-                                            <span className="text-xs font-semibold text-gray-700">
-                                                {(product.rating ?? 4.2).toFixed(1)}
-                                            </span>
-                                        </div>
-                                        <span className="text-xs font-semibold text-gray-500">
-                                            ({product.reviewCount ?? 120})
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-auto">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                                                    Price
+                    view === 'grid' ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7">
+                            {products.map((product) => (
+                                <div
+                                    key={product.id}
+                                    className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col min-w-0"
+                                >
+                                    <div className="relative aspect-[4/5] bg-[#F1F5F9] overflow-hidden">
+                                        <img
+                                            src={getProductImageSrc(product)}
+                                            alt={product.name}
+                                            className="block w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-[1.03]"
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                        <div className="absolute top-3 left-3">
+                                            {product.category && (
+                                                <span className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50/90 backdrop-blur-md rounded-full border border-blue-100 shadow-sm">
+                                                    {product.category.name}
                                                 </span>
-                                                <span className="text-2xl font-black text-[#0F172A]">
-                                                    ${Number(product.price).toFixed(2)}
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="p-5 flex-1 flex flex-col min-w-0">
+                                        <h3 className="text-base sm:text-[17px] font-extrabold text-[#0F172A] mb-1.5 group-hover:text-gray-900 transition-colors line-clamp-2">
+                                            {product.name}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed font-medium">
+                                            {product.description}
+                                        </p>
+
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-1.5">
+                                                <RatingStars value={product.rating ?? 4.2} />
+                                                <span className="text-xs font-semibold text-gray-700">
+                                                    {(product.rating ?? 4.2).toFixed(1)}
+                                                </span>
+                                                <span className="text-xs font-semibold text-gray-500">
+                                                    ({product.reviewCount ?? 120})
                                                 </span>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                                                    Availability
-                                                </span>
+                                        </div>
+
+                                        <div className="mt-auto">
+                                            <div className="flex items-end justify-between mb-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                                        Price
+                                                    </span>
+                                                    <span className="text-xl font-black text-[#0F172A]">
+                                                        ${Number(product.price).toFixed(2)}
+                                                    </span>
+                                                </div>
                                                 <span
-                                                    className={`text-xs font-bold px-2 py-0.5 rounded-md ${product.stock > 10 ? 'text-green-600 bg-green-50' : 'text-orange-600 bg-orange-50'}`}
+                                                    className={`text-xs font-bold px-2 py-1 rounded-md ${product.stock > 10 ? 'text-green-700 bg-green-50' : 'text-orange-700 bg-orange-50'}`}
                                                 >
-                                                    {product.stock > 0
-                                                        ? `${product.stock} Units`
-                                                        : 'Sold Out'}
+                                                    {product.stock > 0 ? `${product.stock} in stock` : 'Sold out'}
                                                 </span>
                                             </div>
-                                        </div>
 
-                                        <button
-                                            onClick={() => handleAddToCart(product)}
-                                            disabled={product.stock === 0}
-                                            className="w-full py-3.5 px-5 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.99] flex items-center justify-center space-x-2 group/btn"
-                                        >
-                                            <span>
-                                                {product.stock === 0
-                                                    ? 'Out of Stock'
-                                                    : 'Add to cart'}
-                                            </span>
-                                            <svg
-                                                className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                            <button
+                                                onClick={() => handleAddToCart(product)}
+                                                disabled={product.stock === 0}
+                                                className="w-full h-11 px-5 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.99] flex items-center justify-center gap-2 whitespace-nowrap"
                                             >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                                />
-                                            </svg>
-                                        </button>
+                                                <span>{product.stock === 0 ? 'Out of stock' : 'Add to cart'}</span>
+                                                <svg
+                                                    className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {products.map((product) => (
+                                <div
+                                    key={product.id}
+                                    className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+                                >
+                                    <div className="flex flex-col sm:flex-row">
+                                        <div className="relative w-full sm:w-56 aspect-[4/3] sm:aspect-auto sm:h-44 bg-[#F1F5F9] overflow-hidden">
+                                            <img
+                                                src={getProductImageSrc(product)}
+                                                alt={product.name}
+                                                className="block w-full h-full object-cover"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        </div>
+
+                                        <div className="flex-1 p-5 min-w-0">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="min-w-0">
+                                                    <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                                                        {product.category?.name ?? 'Shop'}
+                                                    </div>
+                                                    <h3 className="mt-1 text-lg font-extrabold text-[#0F172A] line-clamp-2">
+                                                        {product.name}
+                                                    </h3>
+                                                </div>
+
+                                                <div className="text-right shrink-0">
+                                                    <div className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                                                        Price
+                                                    </div>
+                                                    <div className="text-2xl font-black text-[#0F172A]">
+                                                        ${Number(product.price).toFixed(2)}
+                                                    </div>
+                                                    <div className="mt-1">
+                                                        <span
+                                                            className={`text-xs font-bold px-2 py-1 rounded-md inline-block ${
+                                                                product.stock === 0
+                                                                    ? 'text-gray-600 bg-gray-100'
+                                                                    : product.stock > 10
+                                                                        ? 'text-green-700 bg-green-50'
+                                                                        : 'text-orange-700 bg-orange-50'
+                                                            }`}
+                                                        >
+                                                            {product.stock === 0
+                                                                ? 'Sold out'
+                                                                : product.stock > 10
+                                                                    ? 'In stock'
+                                                                    : `Only ${product.stock} left`}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <RatingStars value={product.rating ?? 4.2} />
+                                                <span className="text-xs font-semibold text-gray-700">
+                                                    {(product.rating ?? 4.2).toFixed(1)}
+                                                </span>
+                                                <span className="text-xs font-semibold text-gray-500">
+                                                    ({product.reviewCount ?? 120})
+                                                </span>
+                                            </div>
+
+                                            <p className={`mt-3 text-sm text-gray-600 leading-relaxed ${view === 'detail' ? '' : 'line-clamp-2'}`}>
+                                                {product.description}
+                                            </p>
+
+                                            <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+                                                <button
+                                                    onClick={() => handleAddToCart(product)}
+                                                    disabled={product.stock === 0}
+                                                    className="h-11 px-5 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.99] inline-flex items-center justify-center gap-2 whitespace-nowrap"
+                                                >
+                                                    <span>{product.stock === 0 ? 'Out of stock' : 'Add to cart'}</span>
+                                                    <svg
+                                                        className="w-5 h-5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )
                 )}
                     </section>
                 </div>

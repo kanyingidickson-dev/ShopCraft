@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useCategoriesQuery } from '../hooks/useCategories';
 import CartDrawer from './CartDrawer';
 
 const Header: React.FC = () => {
@@ -9,6 +10,7 @@ const Header: React.FC = () => {
     const { itemCount } = useCart();
     const location = useLocation();
     const navigate = useNavigate();
+    const { data: categories = [] } = useCategoriesQuery();
 
     const currentQuery = useMemo(() => {
         const sp = new URLSearchParams(location.search);
@@ -25,24 +27,22 @@ const Header: React.FC = () => {
 
     const isActive = (path: string) => location.pathname === path;
 
-    const quickCategories = useMemo(
-        () => [
-            'Electronics',
-            'Fashion',
-            'Home & Kitchen',
-            'Beauty',
-            'Books',
-            'Sports & Outdoors',
-            'Toys & Games',
-            'Health',
-        ],
-        [],
-    );
+    const categoryIdByName = useMemo(() => {
+        const pairs = categories.map((c) => [c.name, c.id] as const);
+        return Object.fromEntries(pairs) as Record<string, string>;
+    }, [categories]);
 
     const submitSearch = (value: string) => {
         const q = value.trim();
         const search = q ? `?${new URLSearchParams({ q }).toString()}` : '';
         navigate(`/products${search}`);
+    };
+
+    const selectCategory = (name: string) => {
+        const id = categoryIdByName[name];
+        const sp = new URLSearchParams();
+        if (id) sp.set('categoryId', id);
+        navigate(`/products?${sp.toString()}`);
     };
 
     return (
@@ -327,6 +327,7 @@ const Header: React.FC = () => {
                                         type="button"
                                         onClick={() => {
                                             setSearchValue('');
+                                            submitSearch('');
                                         }}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
                                         aria-label="Clear search"
@@ -358,11 +359,11 @@ const Header: React.FC = () => {
 
                 <div className="hidden lg:flex items-center gap-2 pb-2">
                     <span className="text-xs font-semibold text-gray-500 mr-1">Categories:</span>
-                    {quickCategories.slice(0, 6).map((cat) => (
+                    {['Electronics', 'Fashion', 'Home & Kitchen', 'Beauty', 'Books', 'Sports & Outdoors'].map((cat) => (
                         <button
                             key={cat}
                             type="button"
-                            onClick={() => submitSearch(cat)}
+                            onClick={() => selectCategory(cat)}
                             className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-2 py-1 rounded-md transition-colors"
                         >
                             {cat}

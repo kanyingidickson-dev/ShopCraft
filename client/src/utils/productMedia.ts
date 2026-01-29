@@ -42,7 +42,7 @@ const makeProductThumbDataUrl = (product: Product) => {
     const c = 40 + ((seed >>> 16) % 50);
 
     const safeName = escapeXml(product.name);
-    const safeCategory = escapeXml(categoryName);
+    const safeCategoryUpper = escapeXml(categoryName.toUpperCase());
     const shortName = safeName.length > 28 ? `${safeName.slice(0, 27)}…` : safeName;
 
     const iconPaths: Record<string, string> = {
@@ -102,7 +102,7 @@ const makeProductThumbDataUrl = (product: Product) => {
 
   <rect x="56" y="56" width="688" height="888" rx="56" fill="#FFFFFF" opacity="0.72" filter="url(#cardShadow)"/>
 
-  <text x="96" y="132" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="22" font-weight="800" fill="#475569">${safeCategory.toUpperCase()}</text>
+  <text x="96" y="132" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="22" font-weight="800" fill="#475569">${safeCategoryUpper}</text>
   <text x="96" y="184" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="34" font-weight="900" fill="#0F172A">${shortName}</text>
 
   <g transform="translate(0,0)">
@@ -131,5 +131,29 @@ export const getProductImageSrc = (product: Product) => {
         'LED Desk Lamp': `${baseUrl}images/lamp.png`,
     };
 
-    return images[product.name] ?? makeProductThumbDataUrl(product);
+    const direct = images[product.name];
+    if (direct) return direct;
+
+    const categoryName = product.category?.name ?? 'Shop';
+
+    const pools: Record<string, string[]> = {
+        Electronics: ['headphones.png', 'watch.png', 'laptop_stand.png'],
+        Fashion: ['shoes.png', 'watch.png'],
+        'Home & Kitchen': ['lamp.png', 'coffee_maker.png', 'laptop_stand.png'],
+        Beauty: ['lamp.png', 'watch.png'],
+        Books: ['laptop_stand.png', 'lamp.png'],
+        'Sports & Outdoors': ['shoes.png', 'watch.png'],
+        'Toys & Games': ['headphones.png', 'lamp.png'],
+        Health: ['watch.png', 'coffee_maker.png'],
+        Shop: ['headphones.png', 'watch.png', 'shoes.png', 'laptop_stand.png', 'coffee_maker.png', 'lamp.png'],
+    };
+
+    const pool = pools[categoryName] ?? pools.Shop;
+    if (pool.length > 0) {
+        const seed = hashString(`${product.id ?? product.name}:${categoryName}:${product.name}`);
+        const file = pool[seed % pool.length];
+        return `${baseUrl}images/${file}`;
+    }
+
+    return makeProductThumbDataUrl(product);
 };
